@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight } from 'lucide-react';
 import { MOCK_PRODUCTS } from './constants';
 import { Product, CartItem, Category } from './types';
 import ProductList from './components/ProductList';
 import CartSidebar from './components/CartSidebar';
 import CuratorChat from './components/CuratorChat';
+import CheckoutModal from './components/CheckoutModal';
 import Button from './components/Button';
 
 const App: React.FC = () => {
@@ -13,6 +14,7 @@ const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category>(Category.ALL);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -48,6 +50,16 @@ const App: React.FC = () => {
     setCart(prev => prev.filter(item => item.id !== id));
   };
 
+  const handleStartCheckout = () => {
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleCheckoutComplete = () => {
+    setCart([]);
+    // Modal will be closed by the user clicking "Return to Shop" which calls onClose
+  };
+
   const navigateToProduct = (product: Product) => {
     setSelectedProduct(product);
     setCurrentView('product');
@@ -63,28 +75,29 @@ const App: React.FC = () => {
   // Components (Inline for layout simplicity within file constraints)
   
   const Header = () => (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-sm">
+      <div className="h-1 w-full pattern-tibeb"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div 
-            className="flex flex-col cursor-pointer" 
+            className="flex flex-col cursor-pointer group" 
             onClick={() => setCurrentView('home')}
           >
-            <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight">ABYSSINIA <span className="text-emerald-800">DIRECT</span></h1>
-            <span className="text-xs text-stone-500 uppercase tracking-widest hidden sm:block">Addis Ababa • Paris • Berlin</span>
+            <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight group-hover:text-emerald-900 transition-colors">ABYSSINIA <span className="text-emerald-800">DIRECT</span></h1>
+            <span className="text-[10px] text-stone-500 uppercase tracking-[0.2em] hidden sm:block">Addis Ababa • Paris • Berlin</span>
           </div>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex gap-8">
-            <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-wide hover:text-emerald-800 ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-emerald-800 underline underline-offset-4' : 'text-stone-600'}`}>Shop All</button>
-            <button onClick={() => navigateToShop(Category.FASHION)} className="text-sm font-medium uppercase tracking-wide text-stone-600 hover:text-emerald-800">Fashion</button>
-            <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-wide text-stone-600 hover:text-emerald-800">Art</button>
-            <button onClick={() => navigateToShop(Category.HOME)} className="text-sm font-medium uppercase tracking-wide text-stone-600 hover:text-emerald-800">Home</button>
+            <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-widest hover:text-emerald-800 transition-colors ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-emerald-800 border-b-2 border-emerald-800' : 'text-stone-600'}`}>Shop All</button>
+            <button onClick={() => navigateToShop(Category.FASHION)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-emerald-800 transition-colors">Fashion</button>
+            <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-emerald-800 transition-colors">Art</button>
+            <button onClick={() => navigateToShop(Category.HOME)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-emerald-800 transition-colors">Home</button>
           </nav>
 
           {/* Icons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             <button className="text-stone-600 hover:text-stone-900 hidden sm:block">
               <Search size={20} />
             </button>
@@ -95,7 +108,7 @@ const App: React.FC = () => {
               >
                 <ShoppingBag size={24} />
                 {cart.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-emerald-800 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-emerald-800 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center animate-bounce">
                     {cart.length}
                   </span>
                 )}
@@ -113,69 +126,81 @@ const App: React.FC = () => {
       
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-stone-200 py-4 px-4 space-y-4">
-           <button onClick={() => {navigateToShop(Category.ALL); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-medium text-stone-800">Shop All</button>
-           <button onClick={() => {navigateToShop(Category.FASHION); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-medium text-stone-800">Fashion</button>
-           <button onClick={() => {navigateToShop(Category.ART); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-medium text-stone-800">Art</button>
-           <button onClick={() => {navigateToShop(Category.HOME); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-medium text-stone-800">Home & Coffee</button>
+        <div className="md:hidden bg-parchment border-b border-stone-200 py-4 px-4 space-y-4 shadow-lg">
+           <button onClick={() => {navigateToShop(Category.ALL); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Shop All</button>
+           <button onClick={() => {navigateToShop(Category.FASHION); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Fashion</button>
+           <button onClick={() => {navigateToShop(Category.ART); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Art</button>
+           <button onClick={() => {navigateToShop(Category.HOME); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800">Home & Coffee</button>
         </div>
       )}
     </header>
   );
 
   const Hero = () => (
-    <div className="relative bg-stone-900 text-white overflow-hidden">
+    <div className="relative bg-stone-900 text-white overflow-hidden h-[80vh]">
       <div className="absolute inset-0">
         <img 
           src="https://picsum.photos/id/1015/1600/900" 
           alt="Ethiopian Landscape" 
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover opacity-50 scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-900/60 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-black/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-stone-900/80 via-stone-900/40 to-transparent"></div>
       </div>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
-        <h2 className="text-gold-accent font-medium tracking-widest uppercase mb-4">Authentic Heritage</h2>
-        <h1 className="text-5xl sm:text-7xl font-serif font-bold mb-6 leading-tight">
-          Ethiopia to Europe,<br/> Direct.
-        </h1>
-        <p className="text-xl text-stone-200 max-w-2xl mb-10 font-light">
-          Experience the cradle of humanity through curated fashion, ancient art, and ceremonial coffee artifacts. Ethically sourced, delivered to your door in Brussels, London, or Paris.
-        </p>
-        <div className="flex gap-4">
-          <Button size="lg" onClick={() => navigateToShop()}>Explore Collection</Button>
-          <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-stone-900">
-            Our Story
-          </Button>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center">
+        <div className="max-w-3xl animate-fade-in">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="h-[1px] w-12 bg-eth-yellow"></div>
+                <h2 className="text-eth-yellow font-medium tracking-[0.3em] uppercase text-sm">Authentic Heritage</h2>
+            </div>
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-serif font-bold mb-8 leading-[1.1]">
+            Ethiopia<br/> to Europe.
+            </h1>
+            <p className="text-xl text-stone-200 max-w-xl mb-12 font-light leading-relaxed border-l-2 border-eth-green pl-6">
+            Experience the cradle of humanity through curated fashion, ancient art, and ceremonial coffee artifacts. Ethically sourced, delivered to your door.
+            </p>
+            <div className="flex gap-6">
+            <Button size="lg" onClick={() => navigateToShop()} className="bg-eth-green hover:bg-emerald-800 border-none">Explore Collection</Button>
+            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-stone-900 backdrop-blur-sm">
+                Our Story
+            </Button>
+            </div>
         </div>
       </div>
     </div>
   );
 
   const CategorySection = () => (
-    <div className="py-20 bg-white">
+    <div className="py-24 bg-parchment pattern-tibeb-subtle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-serif font-bold text-stone-900 mb-4">Curated Categories</h2>
-          <div className="w-24 h-1 bg-gold-accent mx-auto"></div>
+          <span className="text-emerald-800 uppercase tracking-widest text-xs font-bold mb-2 block">Discover</span>
+          <h2 className="text-4xl font-serif font-bold text-stone-900 mb-6">Curated Collections</h2>
+          <div className="w-24 h-1 pattern-tibeb mx-auto"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { icon: Shirt, label: 'Traditional Fashion', cat: Category.FASHION, desc: 'Handwoven Tibeb & Modern Cuts' },
-            { icon: Palette, label: 'Fine Art & Icons', cat: Category.ART, desc: 'Coptic Art & Contemporary Canvas' },
-            { icon: Coffee, label: 'Coffee Ceremony', cat: Category.HOME, desc: 'Jebena, Sini & Incense' },
+            { icon: Shirt, label: 'Traditional Fashion', cat: Category.FASHION, desc: 'Handwoven Tibeb & Modern Cuts', image: 'https://picsum.photos/id/400/800/600' },
+            { icon: Palette, label: 'Fine Art & Icons', cat: Category.ART, desc: 'Coptic Art & Contemporary Canvas', image: 'https://picsum.photos/id/500/800/600' },
+            { icon: Coffee, label: 'Coffee Ceremony', cat: Category.HOME, desc: 'Jebena, Sini & Incense', image: 'https://picsum.photos/id/450/800/600' },
           ].map((item, idx) => (
             <div 
               key={idx} 
               onClick={() => navigateToShop(item.cat)}
-              className="bg-parchment p-8 rounded-xl border border-stone-100 hover:shadow-lg transition-all cursor-pointer group"
+              className="relative h-96 group rounded-xl overflow-hidden cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500"
             >
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm group-hover:bg-emerald-900 group-hover:text-white transition-colors">
-                <item.icon size={32} />
-              </div>
-              <h3 className="text-xl font-serif font-bold mb-2 text-stone-900">{item.label}</h3>
-              <p className="text-stone-600">{item.desc}</p>
-              <div className="mt-6 flex items-center text-emerald-800 font-medium text-sm group-hover:translate-x-2 transition-transform">
-                Shop Now <ChevronRight size={16} />
+              <img src={item.image} alt={item.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent opacity-90 group-hover:opacity-80 transition-opacity"></div>
+              
+              <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                  <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-4 text-white border border-white/20">
+                    <item.icon size={24} />
+                  </div>
+                  <h3 className="text-2xl font-serif font-bold text-white mb-2">{item.label}</h3>
+                  <p className="text-stone-300 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{item.desc}</p>
+                  <div className="flex items-center text-eth-yellow font-medium text-sm tracking-wide uppercase">
+                    Shop Now <ChevronRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform" />
+                  </div>
               </div>
             </div>
           ))}
@@ -185,54 +210,78 @@ const App: React.FC = () => {
   );
 
   const ProductDetailView = ({ product }: { product: Product }) => (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <button 
-        onClick={() => setCurrentView('shop')}
-        className="flex items-center text-stone-500 hover:text-stone-900 mb-8"
-      >
-        <ArrowLeft size={20} className="mr-2" /> Back to Shop
-      </button>
+    <div className="bg-parchment min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <button 
+            onClick={() => setCurrentView('shop')}
+            className="flex items-center text-stone-500 hover:text-stone-900 mb-8 transition-colors group"
+        >
+            <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Shop
+        </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        {/* Image */}
-        <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-stone-100">
-          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-        </div>
-
-        {/* Info */}
-        <div className="flex flex-col justify-center">
-          <span className="text-emerald-800 font-medium tracking-wide uppercase text-sm mb-2">{product.category}</span>
-          <h1 className="text-4xl font-serif font-bold text-stone-900 mb-4">{product.name}</h1>
-          <p className="text-2xl text-stone-800 font-light mb-8">{product.currency}{product.price}</p>
-          
-          <div className="prose prose-stone mb-8">
-            <p>{product.description}</p>
-            <h3 className="font-serif text-lg mt-6 mb-2">Heritage & Craft</h3>
-            <p className="text-stone-600 text-sm leading-relaxed">{product.detailedHistory}</p>
-          </div>
-
-          <div className="flex gap-4 mb-8">
-            <Button size="lg" className="flex-1" onClick={() => handleAddToCart(product)} disabled={!product.inStock}>
-              {product.inStock ? 'Add to Collection' : 'Out of Stock'}
-            </Button>
-          </div>
-
-          <div className="bg-parchment p-4 rounded-lg border border-stone-200">
-            <div className="flex items-start gap-3">
-              <Globe size={20} className="text-emerald-800 mt-1" />
-              <div>
-                <h4 className="font-bold text-stone-900 text-sm">International Shipping</h4>
-                <p className="text-xs text-stone-600">Express delivery to EU via Ethiopian Airlines Cargo.</p>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            {/* Image */}
+            <div className="relative bg-white rounded-sm shadow-xl p-2 rotate-1 hover:rotate-0 transition-transform duration-500 border border-stone-200">
+            <div className="aspect-[4/5] overflow-hidden relative">
+                <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-4 py-2 text-xs font-mono uppercase tracking-widest text-stone-800">
+                    Authentic
+                </div>
             </div>
-          </div>
+            </div>
+
+            {/* Info */}
+            <div className="flex flex-col justify-center pt-8">
+            <div className="flex items-center gap-2 mb-4">
+                <span className="h-px w-8 bg-emerald-800"></span>
+                <span className="text-emerald-800 font-bold tracking-widest uppercase text-xs">{product.category}</span>
+            </div>
+            
+            <h1 className="text-5xl font-serif font-bold text-stone-900 mb-6 leading-tight">{product.name}</h1>
+            <p className="text-3xl text-coffee font-serif italic mb-8">{product.currency}{product.price}</p>
+            
+            <div className="prose prose-stone mb-10">
+                <p className="text-lg leading-relaxed text-stone-700">{product.description}</p>
+                
+                <div className="bg-white p-6 border-l-4 border-eth-yellow my-8 shadow-sm">
+                    <h3 className="font-serif text-lg text-stone-900 mb-2 flex items-center gap-2">
+                        <Globe size={16} className="text-stone-400" />
+                        Heritage & Craft
+                    </h3>
+                    <p className="text-stone-600 text-sm leading-relaxed italic">{product.detailedHistory}</p>
+                </div>
+            </div>
+
+            <div className="flex gap-4 mb-10">
+                <Button size="lg" className="flex-1 h-14 bg-emerald-900 text-lg" onClick={() => handleAddToCart(product)} disabled={!product.inStock}>
+                {product.inStock ? 'Add to Collection' : 'Out of Stock'}
+                </Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 border-t border-stone-200 pt-6">
+                <div className="flex items-start gap-3">
+                <div className="p-2 bg-emerald-50 rounded-full text-emerald-900"><Globe size={20} /></div>
+                <div>
+                    <h4 className="font-bold text-stone-900 text-sm">Global Shipping</h4>
+                    <p className="text-xs text-stone-600 mt-1">Direct from Addis Ababa via Ethiopian Airlines.</p>
+                </div>
+                </div>
+                <div className="flex items-start gap-3">
+                <div className="p-2 bg-emerald-50 rounded-full text-emerald-900"><Palette size={20} /></div>
+                <div>
+                    <h4 className="font-bold text-stone-900 text-sm">Artisan Crafted</h4>
+                    <p className="text-xs text-stone-600 mt-1">Handmade by master craftsmen in Ethiopia.</p>
+                </div>
+                </div>
+            </div>
+            </div>
         </div>
-      </div>
+        </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen font-sans bg-stone-50 text-stone-900 selection:bg-emerald-200 selection:text-emerald-900">
+    <div className="min-h-screen font-sans bg-stone-50 text-stone-900 selection:bg-eth-yellow selection:text-stone-900">
       <Header />
       
       <main>
@@ -240,11 +289,16 @@ const App: React.FC = () => {
           <>
             <Hero />
             <CategorySection />
-            <div className="py-20 bg-stone-50">
+            <div className="py-24 bg-white">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                 <div className="flex justify-between items-end mb-12">
-                    <h2 className="text-3xl font-serif font-bold">Featured Arrivals</h2>
-                    <button onClick={() => navigateToShop()} className="text-emerald-800 font-medium hover:underline">View All</button>
+                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+                    <div>
+                        <h2 className="text-3xl font-serif font-bold text-stone-900">Featured Arrivals</h2>
+                        <p className="text-stone-500 mt-2">New treasures from the highlands.</p>
+                    </div>
+                    <button onClick={() => navigateToShop()} className="text-emerald-800 font-bold hover:text-emerald-900 flex items-center gap-2 transition-colors">
+                        View All Collection <ArrowRight size={16} />
+                    </button>
                  </div>
                  <ProductList 
                     products={MOCK_PRODUCTS.slice(0, 3)} 
@@ -257,17 +311,21 @@ const App: React.FC = () => {
         )}
 
         {currentView === 'shop' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-10">
-              <h1 className="text-4xl font-serif font-bold mb-4 md:mb-0">
-                {selectedCategory === Category.ALL ? 'Full Collection' : selectedCategory}
-              </h1>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+              <div>
+                <h1 className="text-4xl font-serif font-bold mb-2">
+                    {selectedCategory === Category.ALL ? 'Full Collection' : selectedCategory}
+                </h1>
+                <p className="text-stone-500">Discover authentic Ethiopian craftsmanship.</p>
+              </div>
+              
               <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
                 {Object.values(Category).map(cat => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat ? 'bg-stone-900 text-white' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-100'}`}
+                    className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${selectedCategory === cat ? 'bg-stone-900 text-white shadow-lg transform scale-105' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:border-emerald-200'}`}
                   >
                     {cat}
                   </button>
@@ -287,31 +345,41 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <footer className="bg-stone-900 text-stone-400 py-12 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <footer className="bg-stone-900 text-stone-400 py-16 mt-0 relative">
+        <div className="absolute top-0 left-0 right-0 h-1 pattern-tibeb"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
-             <h2 className="text-white text-xl font-serif font-bold mb-4">ABYSSINIA DIRECT</h2>
-             <p className="max-w-sm text-sm">Connecting the Horn of Africa to the world. We specialize in ethically sourced, high-quality cultural artifacts, textiles, and coffee from Ethiopia.</p>
+             <h2 className="text-white text-2xl font-serif font-bold mb-6 tracking-wide">ABYSSINIA <span className="text-eth-green">DIRECT</span></h2>
+             <p className="max-w-sm text-sm leading-relaxed mb-6">Connecting the Horn of Africa to the world. We specialize in ethically sourced, high-quality cultural artifacts, textiles, and coffee from Ethiopia.</p>
+             <div className="flex gap-4">
+                 <div className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-eth-green hover:text-white transition-colors cursor-pointer"><Globe size={18}/></div>
+                 <div className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-eth-yellow hover:text-stone-900 transition-colors cursor-pointer"><Coffee size={18}/></div>
+             </div>
           </div>
           <div>
-            <h3 className="text-white font-bold mb-4">Customer Care</h3>
-            <ul className="space-y-2 text-sm">
-              <li className="hover:text-white cursor-pointer">Shipping Policy (EU)</li>
-              <li className="hover:text-white cursor-pointer">Authenticity Guarantee</li>
-              <li className="hover:text-white cursor-pointer">Returns</li>
+            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-eth-yellow">Customer Care</h3>
+            <ul className="space-y-3 text-sm">
+              <li className="hover:text-white cursor-pointer transition-colors">Shipping Policy (EU)</li>
+              <li className="hover:text-white cursor-pointer transition-colors">Authenticity Guarantee</li>
+              <li className="hover:text-white cursor-pointer transition-colors">Returns & Exchanges</li>
+              <li className="hover:text-white cursor-pointer transition-colors">Track Your Order</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-white font-bold mb-4">Contact</h3>
-            <ul className="space-y-2 text-sm">
-              <li>support@abyssiniadirect.com</li>
-              <li>+32 2 555 0199 (Brussels HQ)</li>
-              <li>Bole Road, Addis Ababa</li>
+            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-eth-yellow">Contact</h3>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-eth-green"></span> support@abyssiniadirect.com</li>
+              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-eth-yellow"></span> +32 2 555 0199 (Brussels HQ)</li>
+              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-eth-red"></span> Bole Road, Addis Ababa</li>
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-stone-800 text-xs text-center">
-          © 2024 Abyssinia Direct. All Rights Reserved.
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-stone-800 text-xs text-center flex justify-between items-center text-stone-500">
+          <p>© 2024 Abyssinia Direct. All Rights Reserved.</p>
+          <div className="flex gap-4">
+              <span>Privacy Policy</span>
+              <span>Terms of Service</span>
+          </div>
         </div>
       </footer>
 
@@ -321,6 +389,14 @@ const App: React.FC = () => {
         items={cart}
         onUpdateQuantity={handleUpdateCartQuantity}
         onRemove={handleRemoveFromCart}
+        onCheckout={handleStartCheckout}
+      />
+
+      <CheckoutModal 
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cart={cart}
+        onComplete={handleCheckoutComplete}
       />
 
       <CuratorChat activeProduct={currentView === 'product' ? selectedProduct : undefined} />
