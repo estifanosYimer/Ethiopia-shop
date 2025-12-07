@@ -157,7 +157,7 @@ const App: React.FC = () => {
   );
 
   const CategorySection = () => (
-    <div className="py-24 bg-parchment pattern-tibeb-subtle">
+    <div className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <span className="text-eth-earth uppercase tracking-widest text-xs font-bold mb-2 block">Discover</span>
