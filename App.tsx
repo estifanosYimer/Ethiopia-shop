@@ -76,7 +76,6 @@ const App: React.FC = () => {
   
   const Header = () => (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-sm">
-      <div className="h-1 w-full pattern-tibeb"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
@@ -84,16 +83,16 @@ const App: React.FC = () => {
             className="flex flex-col cursor-pointer group" 
             onClick={() => setCurrentView('home')}
           >
-            <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight group-hover:text-emerald-900 transition-colors">ABYSSINIA <span className="text-emerald-800">DIRECT</span></h1>
+            <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight group-hover:text-eth-earth transition-colors">ABYSSINIA <span className="text-eth-earth">DIRECT</span></h1>
             <span className="text-[10px] text-stone-500 uppercase tracking-[0.2em] hidden sm:block">Addis Ababa • Paris • Berlin</span>
           </div>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex gap-8">
-            <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-widest hover:text-emerald-800 transition-colors ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-emerald-800 border-b-2 border-emerald-800' : 'text-stone-600'}`}>Shop All</button>
-            <button onClick={() => navigateToShop(Category.FASHION)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-emerald-800 transition-colors">Fashion</button>
-            <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-emerald-800 transition-colors">Art</button>
-            <button onClick={() => navigateToShop(Category.HOME)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-emerald-800 transition-colors">Home</button>
+            <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-widest hover:text-eth-earth transition-colors ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-eth-earth border-b-2 border-eth-earth' : 'text-stone-600'}`}>Shop All</button>
+            <button onClick={() => navigateToShop(Category.FASHION)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Fashion</button>
+            <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Art</button>
+            <button onClick={() => navigateToShop(Category.HOME)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Home</button>
           </nav>
 
           {/* Icons */}
@@ -103,12 +102,12 @@ const App: React.FC = () => {
             </button>
             <div className="relative">
               <button 
-                className="text-stone-600 hover:text-emerald-800 transition-colors"
+                className="text-stone-600 hover:text-eth-earth transition-colors"
                 onClick={() => setIsCartOpen(true)}
               >
                 <ShoppingBag size={24} />
                 {cart.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-emerald-800 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center animate-bounce">
+                  <span className="absolute -top-1 -right-1 bg-eth-earth text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center animate-bounce">
                     {cart.length}
                   </span>
                 )}
@@ -137,33 +136,20 @@ const App: React.FC = () => {
   );
 
   const Hero = () => (
-    <div className="relative bg-stone-900 text-white overflow-hidden h-[80vh]">
-      <div className="absolute inset-0">
-        <img 
-          src="https://picsum.photos/id/1015/1600/900" 
-          alt="Ethiopian Landscape" 
-          className="w-full h-full object-cover opacity-50 scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-black/30"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-stone-900/80 via-stone-900/40 to-transparent"></div>
-      </div>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center">
-        <div className="max-w-3xl animate-fade-in">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="h-[1px] w-12 bg-eth-yellow"></div>
-                <h2 className="text-eth-yellow font-medium tracking-[0.3em] uppercase text-sm">Authentic Heritage</h2>
+    <div className="relative bg-eth-earth text-white overflow-hidden h-[75vh] flex items-center justify-center text-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center items-center">
+        <div className="max-w-4xl animate-fade-in flex flex-col items-center">
+            <div className="mb-6">
+                <h2 className="text-gold-accent font-medium tracking-[0.3em] uppercase text-sm mb-4">Direct from Addis Ababa to Europe</h2>
             </div>
-            <h1 className="text-5xl sm:text-7xl md:text-8xl font-serif font-bold mb-8 leading-[1.1]">
-            Ethiopia<br/> to Europe.
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-serif font-bold mb-8 leading-tight">
+            Timeless Ethiopian<br/> Craftsmanship
             </h1>
-            <p className="text-xl text-stone-200 max-w-xl mb-12 font-light leading-relaxed border-l-2 border-eth-green pl-6">
-            Experience the cradle of humanity through curated fashion, ancient art, and ceremonial coffee artifacts. Ethically sourced, delivered to your door.
+            <p className="text-xl text-stone-200 max-w-2xl mb-12 font-light leading-relaxed">
+            Explore a curated collection of handwoven Tibeb, ancient manuscripts, and artisan home decor. Verified authentic, delivered to your doorstep.
             </p>
             <div className="flex gap-6">
-            <Button size="lg" onClick={() => navigateToShop()} className="bg-eth-green hover:bg-emerald-800 border-none">Explore Collection</Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-stone-900 backdrop-blur-sm">
-                Our Story
-            </Button>
+            <Button size="lg" onClick={() => navigateToShop()} className="bg-gold-accent text-stone-900 hover:bg-white border-none font-bold px-8">Explore Collection</Button>
             </div>
         </div>
       </div>
@@ -174,9 +160,9 @@ const App: React.FC = () => {
     <div className="py-24 bg-parchment pattern-tibeb-subtle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <span className="text-emerald-800 uppercase tracking-widest text-xs font-bold mb-2 block">Discover</span>
+          <span className="text-eth-earth uppercase tracking-widest text-xs font-bold mb-2 block">Discover</span>
           <h2 className="text-4xl font-serif font-bold text-stone-900 mb-6">Curated Collections</h2>
-          <div className="w-24 h-1 pattern-tibeb mx-auto"></div>
+          <div className="w-24 h-px bg-eth-earth mx-auto"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
@@ -198,7 +184,7 @@ const App: React.FC = () => {
                   </div>
                   <h3 className="text-2xl font-serif font-bold text-white mb-2">{item.label}</h3>
                   <p className="text-stone-300 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{item.desc}</p>
-                  <div className="flex items-center text-eth-yellow font-medium text-sm tracking-wide uppercase">
+                  <div className="flex items-center text-gold-accent font-medium text-sm tracking-wide uppercase">
                     Shop Now <ChevronRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform" />
                   </div>
               </div>
@@ -233,8 +219,8 @@ const App: React.FC = () => {
             {/* Info */}
             <div className="flex flex-col justify-center pt-8">
             <div className="flex items-center gap-2 mb-4">
-                <span className="h-px w-8 bg-emerald-800"></span>
-                <span className="text-emerald-800 font-bold tracking-widest uppercase text-xs">{product.category}</span>
+                <span className="h-px w-8 bg-eth-earth"></span>
+                <span className="text-eth-earth font-bold tracking-widest uppercase text-xs">{product.category}</span>
             </div>
             
             <h1 className="text-5xl font-serif font-bold text-stone-900 mb-6 leading-tight">{product.name}</h1>
@@ -243,7 +229,7 @@ const App: React.FC = () => {
             <div className="prose prose-stone mb-10">
                 <p className="text-lg leading-relaxed text-stone-700">{product.description}</p>
                 
-                <div className="bg-white p-6 border-l-4 border-eth-yellow my-8 shadow-sm">
+                <div className="bg-white p-6 border-l-4 border-gold-accent my-8 shadow-sm">
                     <h3 className="font-serif text-lg text-stone-900 mb-2 flex items-center gap-2">
                         <Globe size={16} className="text-stone-400" />
                         Heritage & Craft
@@ -253,7 +239,7 @@ const App: React.FC = () => {
             </div>
 
             <div className="flex gap-4 mb-10">
-                <Button size="lg" className="flex-1 h-14 bg-emerald-900 text-lg" onClick={() => handleAddToCart(product)} disabled={!product.inStock}>
+                <Button size="lg" className="flex-1 h-14 bg-eth-earth text-lg" onClick={() => handleAddToCart(product)} disabled={!product.inStock}>
                 {product.inStock ? 'Add to Collection' : 'Out of Stock'}
                 </Button>
             </div>
@@ -281,7 +267,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen font-sans bg-stone-50 text-stone-900 selection:bg-eth-yellow selection:text-stone-900">
+    <div className="min-h-screen font-sans bg-stone-50 text-stone-900 selection:bg-gold-accent selection:text-stone-900">
       <Header />
       
       <main>
@@ -296,7 +282,7 @@ const App: React.FC = () => {
                         <h2 className="text-3xl font-serif font-bold text-stone-900">Featured Arrivals</h2>
                         <p className="text-stone-500 mt-2">New treasures from the highlands.</p>
                     </div>
-                    <button onClick={() => navigateToShop()} className="text-emerald-800 font-bold hover:text-emerald-900 flex items-center gap-2 transition-colors">
+                    <button onClick={() => navigateToShop()} className="text-eth-earth font-bold hover:text-emerald-900 flex items-center gap-2 transition-colors">
                         View All Collection <ArrowRight size={16} />
                     </button>
                  </div>
@@ -325,7 +311,7 @@ const App: React.FC = () => {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${selectedCategory === cat ? 'bg-stone-900 text-white shadow-lg transform scale-105' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:border-emerald-200'}`}
+                    className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${selectedCategory === cat ? 'bg-eth-earth text-white shadow-lg transform scale-105' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:border-emerald-200'}`}
                   >
                     {cat}
                   </button>
@@ -346,18 +332,17 @@ const App: React.FC = () => {
       </main>
 
       <footer className="bg-stone-900 text-stone-400 py-16 mt-0 relative">
-        <div className="absolute top-0 left-0 right-0 h-1 pattern-tibeb"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
-             <h2 className="text-white text-2xl font-serif font-bold mb-6 tracking-wide">ABYSSINIA <span className="text-eth-green">DIRECT</span></h2>
+             <h2 className="text-white text-2xl font-serif font-bold mb-6 tracking-wide">ABYSSINIA <span className="text-gold-accent">DIRECT</span></h2>
              <p className="max-w-sm text-sm leading-relaxed mb-6">Connecting the Horn of Africa to the world. We specialize in ethically sourced, high-quality cultural artifacts, textiles, and coffee from Ethiopia.</p>
              <div className="flex gap-4">
-                 <div className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-eth-green hover:text-white transition-colors cursor-pointer"><Globe size={18}/></div>
-                 <div className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-eth-yellow hover:text-stone-900 transition-colors cursor-pointer"><Coffee size={18}/></div>
+                 <div className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-eth-earth hover:text-white transition-colors cursor-pointer"><Globe size={18}/></div>
+                 <div className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-gold-accent hover:text-stone-900 transition-colors cursor-pointer"><Coffee size={18}/></div>
              </div>
           </div>
           <div>
-            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-eth-yellow">Customer Care</h3>
+            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-gold-accent">Customer Care</h3>
             <ul className="space-y-3 text-sm">
               <li className="hover:text-white cursor-pointer transition-colors">Shipping Policy (EU)</li>
               <li className="hover:text-white cursor-pointer transition-colors">Authenticity Guarantee</li>
@@ -366,11 +351,11 @@ const App: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-eth-yellow">Contact</h3>
+            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-gold-accent">Contact</h3>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-eth-green"></span> support@abyssiniadirect.com</li>
-              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-eth-yellow"></span> +32 2 555 0199 (Brussels HQ)</li>
-              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-eth-red"></span> Bole Road, Addis Ababa</li>
+              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-eth-earth"></span> support@abyssiniadirect.com</li>
+              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-gold-accent"></span> +32 2 555 0199 (Brussels HQ)</li>
+              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-stone-600"></span> Bole Road, Addis Ababa</li>
             </ul>
           </div>
         </div>
