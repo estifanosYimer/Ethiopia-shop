@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight as ArrowRightIcon } from 'lucide-react';
 import { MOCK_PRODUCTS } from './constants';
 import { Product, CartItem, Category } from './types';
 import ProductList from './components/ProductList';
@@ -8,6 +8,7 @@ import CuratorChat from './components/CuratorChat';
 import CheckoutModal from './components/CheckoutModal';
 import InfoModal, { InfoModalType } from './components/InfoModal';
 import Button from './components/Button';
+import ImageWithFallback from './components/ImageWithFallback';
 
 const App: React.FC = () => {
   // State
@@ -172,16 +173,21 @@ const App: React.FC = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { icon: Shirt, label: 'Traditional Fashion', cat: Category.FASHION, desc: 'Handwoven Tibeb & Modern Cuts', image: 'https://picsum.photos/id/400/800/600' },
-            { icon: Palette, label: 'Fine Art & Icons', cat: Category.ART, desc: 'Coptic Art & Contemporary Canvas', image: 'https://picsum.photos/id/500/800/600' },
-            { icon: Coffee, label: 'Coffee Ceremony', cat: Category.HOME, desc: 'Jebena, Sini & Incense', image: 'https://picsum.photos/id/450/800/600' },
+            { icon: Shirt, label: 'Traditional Fashion', cat: Category.FASHION, desc: 'Handwoven Tibeb & Modern Cuts', image: '/images/categories/fashion-cat.jpg' },
+            { icon: Palette, label: 'Fine Art & Icons', cat: Category.ART, desc: 'Coptic Art & Contemporary Canvas', image: '/images/categories/art-cat.jpg' },
+            { icon: Coffee, label: 'Coffee Ceremony', cat: Category.HOME, desc: 'Jebena, Sini & Incense', image: '/images/categories/coffee-cat.jpg' },
           ].map((item, idx) => (
             <div 
               key={idx} 
               onClick={() => navigateToShop(item.cat)}
               className="relative h-96 group rounded-xl overflow-hidden cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500"
             >
-              <img src={item.image} alt={item.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <ImageWithFallback 
+                src={item.image} 
+                alt={item.label} 
+                fallbackTerm={`ethiopian ${item.label}`}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent opacity-90 group-hover:opacity-80 transition-opacity"></div>
               
               <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
@@ -215,7 +221,12 @@ const App: React.FC = () => {
             {/* Image */}
             <div className="relative bg-white rounded-sm shadow-xl p-2 rotate-1 hover:rotate-0 transition-transform duration-500 border border-stone-200">
             <div className="aspect-[4/5] overflow-hidden relative">
-                <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                <ImageWithFallback 
+                  src={product.imageUrl} 
+                  alt={product.name} 
+                  fallbackTerm={`ethiopian ${product.category} ${product.name}`}
+                  className="w-full h-full object-cover" 
+                />
                 <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-4 py-2 text-xs font-mono uppercase tracking-widest text-stone-800">
                     Authentic
                 </div>
@@ -289,7 +300,7 @@ const App: React.FC = () => {
                         <p className="text-stone-500 mt-2">New treasures from the highlands.</p>
                     </div>
                     <button onClick={() => navigateToShop()} className="text-eth-earth font-bold hover:text-emerald-900 flex items-center gap-2 transition-colors">
-                        View All Collection <ArrowRight size={16} />
+                        View All Collection <ArrowRightIcon size={16} />
                     </button>
                  </div>
                  <ProductList 

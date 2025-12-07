@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Lock, CheckCircle, CreditCard, Truck, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 import Button from './Button';
 import { CartItem } from '../types';
+import ImageWithFallback from './ImageWithFallback';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -64,7 +65,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
             {cart.map((item) => (
               <div key={item.id} className="flex gap-3">
                 <div className="relative w-16 h-16 rounded bg-white border border-stone-200 overflow-hidden flex-shrink-0">
-                  <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                  <ImageWithFallback 
+                    src={item.imageUrl} 
+                    alt={item.name} 
+                    fallbackTerm={item.name}
+                    className="w-full h-full object-cover" 
+                  />
                   <span className="absolute top-0 right-0 bg-stone-600 text-white text-[10px] px-1.5 py-0.5 rounded-bl">{item.quantity}</span>
                 </div>
                 <div className="flex-1 min-w-0">

@@ -10,7 +10,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.FASHION,
     description: 'Exquisite handwoven cotton dress with gold-thread Tibeb embroidery.',
     detailedHistory: 'Worn for weddings and Timkat festivals, this Kemis represents the pinnacle of Ethiopian weaving (Shemma). The gold threads are woven into the cotton using a technique passed down for centuries.',
-    imageUrl: 'https://loremflickr.com/640/800/ethiopian,dress?random=1',
+    imageUrl: '/images/fashion/royal-habesha-kemis.jpg',
     inStock: true,
   },
   {
@@ -21,7 +21,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.FASHION,
     description: 'Crisp white cotton tunic and trousers with national tricolor trim.',
     detailedHistory: 'A staple for Ethiopian men during holidays. The pure white cotton symbolizes purity, while the clean lines offer timeless elegance suitable for both church services and modern gatherings.',
-    imageUrl: 'https://loremflickr.com/640/800/ethiopian,clothing,man?random=2',
+    imageUrl: '/images/fashion/mens-telet-suit.jpg',
     inStock: true,
   },
   {
@@ -32,7 +32,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.FASHION,
     description: 'Lightweight, gauze-like cotton scarf with colorful border.',
     detailedHistory: 'The Netela is worn daily by Ethiopian women. It is incredibly versatile, used as a headwrap, a shawl, or a sash. The intricate border pattern (Tibeb) indicates the wearer’s region.',
-    imageUrl: 'https://loremflickr.com/640/800/ethiopian,scarf?random=3',
+    imageUrl: '/images/fashion/netela-scarf.jpg',
     inStock: true,
   },
   {
@@ -43,7 +43,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.FASHION,
     description: 'Thick, four-layer cotton blanket wrap for cold evenings.',
     detailedHistory: 'While the Netela is for the day, the Gabi is for the cold highland nights. It is essentially a wearable blanket, woven with thicker cotton threads to trap heat.',
-    imageUrl: 'https://loremflickr.com/640/800/white,textile,texture?random=4',
+    imageUrl: '/images/fashion/cotton-gabi.jpg',
     inStock: true,
   },
   {
@@ -54,7 +54,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.FASHION,
     description: 'Urban streetwear fused with traditional weaving patterns.',
     detailedHistory: 'Designed by young Addis Ababa creatives, this jacket features authentic Tibeb strips sewn onto high-quality modern fabrics, bridging the gap between heritage and hip-hop culture.',
-    imageUrl: 'https://loremflickr.com/640/800/fashion,jacket?random=5',
+    imageUrl: '/images/fashion/tibeb-bomber.jpg',
     inStock: true,
   },
   {
@@ -65,7 +65,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.FASHION,
     description: 'Distinctive black and gold dress style from the Wollo region.',
     detailedHistory: 'Unlike the typical white Shemma, the Raya style is bold and colorful, often accessorized with heavy jewelry. It reflects the vibrant culture of Northern Ethiopia.',
-    imageUrl: 'https://loremflickr.com/640/800/ethiopian,woman,traditional?random=6',
+    imageUrl: '/images/fashion/wollo-raya-dress.jpg',
     inStock: false,
   },
 
@@ -78,7 +78,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.ACCESSORIES,
     description: 'Intricate filigree silver cross inspired by the Axum empire.',
     detailedHistory: 'Lost-wax casting creates these delicate masterpieces. Each region in Ethiopia has a distinct cross style; this one features the flared arms typical of the Tigray region.',
-    imageUrl: 'https://loremflickr.com/640/800/silver,pendant,cross?random=7',
+    imageUrl: '/images/accessories/axumite-cross.jpg',
     inStock: true,
   },
   {
@@ -89,7 +89,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.ACCESSORIES,
     description: 'Large, hand-held brass cross with complex lattice patterns.',
     detailedHistory: 'Used by priests during processions, these crosses symbolize the order of the universe. The "Birds of Peace" motif is often hidden within the geometric lattice.',
-    imageUrl: 'https://loremflickr.com/640/800/ethiopian,cross?random=8',
+    imageUrl: '/images/accessories/lalibela-cross.jpg',
     inStock: true,
   },
   {
@@ -100,7 +100,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.ACCESSORIES,
     description: 'Vibrant, multi-strand glass bead necklace.',
     detailedHistory: 'Crafted by the women of the Omo Valley tribes. The colors and patterns often signify marital status, age, and social standing within the community.',
-    imageUrl: 'https://loremflickr.com/640/800/beads,necklace,tribal?random=9',
+    imageUrl: '/images/accessories/omo-beads.jpg',
     inStock: true,
   },
   {
@@ -111,7 +111,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.ACCESSORIES,
     description: 'Premium Ethiopian highland sheepskin leather bag.',
     detailedHistory: 'Ethiopian leather is prized globally for its softness and durability. This bag is tanned using vegetable dyes in a sustainable facility near Addis Ababa.',
-    imageUrl: 'https://loremflickr.com/640/800/leather,bag,fashion?random=10',
+    imageUrl: '/images/accessories/leather-tote.jpg',
     inStock: true,
   },
 
@@ -124,7 +124,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.HOME,
     description: 'Black clay pottery used for brewing traditional coffee.',
     detailedHistory: 'The Jebena is the centerpiece of the coffee ceremony. Its spherical bottom allows grounds to settle, while the long neck pours clear, strong coffee.',
-    imageUrl: 'https://loremflickr.com/640/800/pottery,clay,pitcher?random=11',
+    imageUrl: '/images/home/jebena-pot.jpg',
     inStock: true,
   },
   {
@@ -135,7 +135,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.HOME,
     description: 'Small, handleless porcelain cups with traditional motifs.',
     detailedHistory: 'Coffee (Buna) is always drunk in company. These small cups ensure that the coffee is consumed quickly while hot, usually in three rounds: Abol, Tona, and Baraka.',
-    imageUrl: 'https://loremflickr.com/640/800/coffee,cup,set?random=12',
+    imageUrl: '/images/home/sini-cups.jpg',
     inStock: true,
   },
   {
@@ -146,7 +146,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.HOME,
     description: 'Large, colorful woven basket table with lid.',
     detailedHistory: 'The Mesob serves as a dining table. Friends and family gather around it to share a meal from a single platter, symbolizing unity and brotherhood.',
-    imageUrl: 'https://loremflickr.com/640/800/woven,basket,colorful?random=13',
+    imageUrl: '/images/home/harar-mesob.jpg',
     inStock: true,
   },
   {
@@ -157,7 +157,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.HOME,
     description: 'Premium single-origin beans, floral and citrus notes.',
     detailedHistory: 'Yirgacheffe is considered the birthplace of coffee. These beans are washed and sun-dried, offering a light, tea-like body with distinct jasmine aromas.',
-    imageUrl: 'https://loremflickr.com/640/800/coffee,beans,roasted?random=14',
+    imageUrl: '/images/home/yirgacheffe-beans.jpg',
     inStock: true,
   },
   {
@@ -168,7 +168,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.HOME,
     description: 'High-grade resin incense from the Tigray region.',
     detailedHistory: 'Incense is burned during coffee ceremonies to purify the air. This set includes a traditional clay burner and resin harvested from Boswellia trees.',
-    imageUrl: 'https://loremflickr.com/640/800/incense,rock,resin?random=15',
+    imageUrl: '/images/home/incense-set.jpg',
     inStock: true,
   },
 
@@ -181,7 +181,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.ART,
     description: 'Hand-painted icon on goatskin vellum.',
     detailedHistory: 'St. George is the patron saint of Ethiopia. This piece follows the Second Gondarine style, characterized by bold lines and expressive eyes.',
-    imageUrl: 'https://loremflickr.com/640/800/painting,icon,orthodox?random=16',
+    imageUrl: '/images/art/st-george-icon.jpg',
     inStock: true,
   },
   {
@@ -192,7 +192,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.ART,
     description: 'Three-panel wooden icon telling the Kebra Nagast story.',
     detailedHistory: 'Depicts the legendary meeting of King Solomon and the Queen of Sheba, the foundational myth of the Solomonic dynasty in Ethiopia.',
-    imageUrl: 'https://loremflickr.com/640/800/triptych,art,religious?random=17',
+    imageUrl: '/images/art/solomon-sheba.jpg',
     inStock: true,
   },
   {
@@ -203,7 +203,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.ART,
     description: 'Canvas painting of the famous ceiling angels of Debre Berhan Selassie.',
     detailedHistory: 'One of the most recognizable images in Ethiopian art. The winged heads represent the omnipresence of God, watching from the heavens.',
-    imageUrl: 'https://loremflickr.com/640/800/angel,mural,painting?random=18',
+    imageUrl: '/images/art/angel-heads.jpg',
     inStock: true,
   },
   {
@@ -214,7 +214,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: Category.ART,
     description: 'Contemporary acrylic painting by emerging Addis artist.',
     detailedHistory: 'Inspired by the Ethio-Jazz movement of the 1970s (Mulatu Astatke), this piece uses vibrant colors to capture the chaotic energy of Addis Ababa nightlife.',
-    imageUrl: 'https://loremflickr.com/640/800/abstract,art,colorful?random=19',
+    imageUrl: '/images/art/addis-jazz-art.jpg',
     inStock: true,
   },
 ];

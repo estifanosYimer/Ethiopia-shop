@@ -1,6 +1,7 @@
 import React from 'react';
 import { Product } from '../types';
 import Button from './Button';
+import ImageWithFallback from './ImageWithFallback';
 
 interface ProductListProps {
   products: Product[];
@@ -23,9 +24,10 @@ const ProductList: React.FC<ProductListProps> = ({ products, onProductClick, onA
             className="relative aspect-[4/5] overflow-hidden cursor-pointer bg-stone-100"
             onClick={() => onProductClick(product)}
           >
-            <img 
+            <ImageWithFallback 
               src={product.imageUrl} 
               alt={product.name} 
+              fallbackTerm={`ethiopian ${product.category} ${product.name}`}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
             {!product.inStock && (

@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Minus, Plus, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { CartItem } from '../types';
 import Button from './Button';
+import ImageWithFallback from './ImageWithFallback';
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -49,7 +50,12 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
               items.map((item) => (
                 <div key={item.id} className="flex gap-4 p-4 bg-white rounded-lg shadow-sm border border-stone-100">
                   <div className="w-20 h-20 bg-stone-100 rounded-md overflow-hidden flex-shrink-0 border border-stone-200">
-                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                    <ImageWithFallback 
+                      src={item.imageUrl} 
+                      alt={item.name} 
+                      fallbackTerm={item.name}
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-serif font-medium text-stone-900">{item.name}</h3>
