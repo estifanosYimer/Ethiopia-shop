@@ -6,6 +6,7 @@ import ProductList from './components/ProductList';
 import CartSidebar from './components/CartSidebar';
 import CuratorChat from './components/CuratorChat';
 import CheckoutModal from './components/CheckoutModal';
+import InfoModal, { InfoModalType } from './components/InfoModal';
 import Button from './components/Button';
 
 const App: React.FC = () => {
@@ -15,6 +16,7 @@ const App: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [infoModalType, setInfoModalType] = useState<InfoModalType>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -70,6 +72,10 @@ const App: React.FC = () => {
     setSelectedCategory(category);
     setCurrentView('shop');
     window.scrollTo(0, 0);
+  };
+
+  const openInfoModal = (type: InfoModalType) => {
+    setInfoModalType(type);
   };
 
   // Components (Inline for layout simplicity within file constraints)
@@ -344,18 +350,27 @@ const App: React.FC = () => {
           <div>
             <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-gold-accent">Customer Care</h3>
             <ul className="space-y-3 text-sm">
-              <li className="hover:text-white cursor-pointer transition-colors">Shipping Policy (EU)</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Authenticity Guarantee</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Returns & Exchanges</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Track Your Order</li>
+              <li onClick={() => openInfoModal('shipping')} className="hover:text-white cursor-pointer transition-colors">Shipping Policy (EU)</li>
+              <li onClick={() => openInfoModal('authenticity')} className="hover:text-white cursor-pointer transition-colors">Authenticity Guarantee</li>
+              <li onClick={() => openInfoModal('returns')} className="hover:text-white cursor-pointer transition-colors">Returns & Exchanges</li>
+              <li onClick={() => openInfoModal('tracking')} className="hover:text-white cursor-pointer transition-colors font-bold text-gold-accent">Track Your Order</li>
             </ul>
           </div>
           <div>
             <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-gold-accent">Contact</h3>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-eth-earth"></span> support@abyssiniadirect.com</li>
-              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-gold-accent"></span> +32 2 555 0199 (Brussels HQ)</li>
-              <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-stone-600"></span> Bole Road, Addis Ababa</li>
+              <li className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-eth-earth flex-shrink-0"></span> 
+                <a href="mailto:estifanosaddisuyimer@gmail.com" className="hover:text-white transition-colors break-all">estifanosaddisuyimer@gmail.com</a>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-gold-accent flex-shrink-0"></span> 
+                <a href="tel:+3225550199" className="hover:text-white transition-colors">+32 2 555 0199 (Brussels HQ)</a>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-stone-600 flex-shrink-0"></span> 
+                <a href="https://maps.google.com/?q=Bole+Road,Addis+Ababa" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Bole Road, Addis Ababa</a>
+              </li>
             </ul>
           </div>
         </div>
@@ -382,6 +397,12 @@ const App: React.FC = () => {
         onClose={() => setIsCheckoutOpen(false)}
         cart={cart}
         onComplete={handleCheckoutComplete}
+      />
+
+      <InfoModal 
+        isOpen={!!infoModalType}
+        onClose={() => setInfoModalType(null)}
+        type={infoModalType}
       />
 
       <CuratorChat activeProduct={currentView === 'product' ? selectedProduct : undefined} />
