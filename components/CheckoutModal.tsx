@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
-import { X, Lock, CheckCircle, CreditCard, Truck, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
+import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy } from 'lucide-react';
 import Button from './Button';
 import { CartItem } from '../types';
 import ImageWithFallback from './ImageWithFallback';
+
+// --- MERCHANT BANK DETAILS ---
+// Replace these with your actual account information
+const MERCHANT_BANK_DETAILS = {
+    bankName: "Commercial Bank of Ethiopia",
+    accountName: "Abyssinia Direct Exports",
+    accountNumber: "1000012345678", // Replace with real account number
+    swiftCode: "CBETETAA", // Replace with real Swift
+    iban: "ET00CBET1000012345678" // Replace with real IBAN
+};
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -12,12 +22,15 @@ interface CheckoutModalProps {
 }
 
 type CheckoutStep = 'shipping' | 'payment' | 'confirmation';
+type PaymentMethod = 'card' | 'bank_transfer';
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, onComplete }) => {
   const [step, setStep] = useState<CheckoutStep>('shipping');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const orderRef = `ETH-${Math.floor(Math.random() * 10000)}`;
 
   if (!isOpen) return null;
 
@@ -164,39 +177,80 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
              <div className="animate-fade-in">
                 <h2 className="text-2xl font-serif font-bold text-stone-900 mb-6">Payment Method</h2>
                 
-                <div className="flex gap-4 mb-6">
-                  <div className="flex-1 border-2 border-emerald-900 bg-emerald-50 rounded-lg p-4 flex items-center justify-center gap-2 cursor-pointer">
-                    <CreditCard size={20} className="text-emerald-900" />
-                    <span className="font-bold text-emerald-900">Card</span>
+                <div className="flex gap-4 mb-8">
+                  <div 
+                    onClick={() => setPaymentMethod('card')}
+                    className={`flex-1 border-2 rounded-lg p-4 flex items-center justify-center gap-2 cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-emerald-900 bg-emerald-50' : 'border-stone-200 hover:border-emerald-200'}`}
+                  >
+                    <CreditCard size={20} className={paymentMethod === 'card' ? "text-emerald-900" : "text-stone-500"} />
+                    <span className={`font-bold ${paymentMethod === 'card' ? "text-emerald-900" : "text-stone-600"}`}>Card</span>
                   </div>
-                  <div className="flex-1 border border-stone-200 rounded-lg p-4 flex items-center justify-center gap-2 opacity-50 cursor-not-allowed">
-                     <span className="font-bold text-stone-500">PayPal</span>
+                  <div 
+                    onClick={() => setPaymentMethod('bank_transfer')}
+                    className={`flex-1 border-2 rounded-lg p-4 flex items-center justify-center gap-2 cursor-pointer transition-all ${paymentMethod === 'bank_transfer' ? 'border-emerald-900 bg-emerald-50' : 'border-stone-200 hover:border-emerald-200'}`}
+                  >
+                     <Building size={20} className={paymentMethod === 'bank_transfer' ? "text-emerald-900" : "text-stone-500"} />
+                     <span className={`font-bold ${paymentMethod === 'bank_transfer' ? "text-emerald-900" : "text-stone-600"}`}>Bank Transfer</span>
                   </div>
                 </div>
 
                 <form className="space-y-4" onSubmit={handlePaymentSubmit}>
-                  <div className="space-y-1">
-                     <label className="text-xs font-bold text-stone-500 uppercase">Card Number</label>
-                     <div className="relative">
-                        <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-                        <input required type="text" placeholder="0000 0000 0000 0000" className="w-full border border-stone-300 rounded px-3 py-2 pl-10 focus:ring-2 focus:ring-emerald-800 outline-none transition-all font-mono" />
-                        <Lock className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600" size={14} />
-                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-stone-500 uppercase">Expiry</label>
-                        <input required type="text" placeholder="MM/YY" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all text-center" />
-                     </div>
-                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-stone-500 uppercase">CVC</label>
-                        <input required type="text" placeholder="123" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all text-center" />
-                     </div>
-                  </div>
-                  <div className="space-y-1">
-                     <label className="text-xs font-bold text-stone-500 uppercase">Cardholder Name</label>
-                     <input required type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
-                  </div>
+                  {paymentMethod === 'card' ? (
+                      <>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-stone-500 uppercase">Card Number</label>
+                            <div className="relative">
+                                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                                <input required type="text" placeholder="0000 0000 0000 0000" className="w-full border border-stone-300 rounded px-3 py-2 pl-10 focus:ring-2 focus:ring-emerald-800 outline-none transition-all font-mono" />
+                                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600" size={14} />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-stone-500 uppercase">Expiry</label>
+                                <input required type="text" placeholder="MM/YY" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all text-center" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-stone-500 uppercase">CVC</label>
+                                <input required type="text" placeholder="123" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all text-center" />
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-stone-500 uppercase">Cardholder Name</label>
+                            <input required type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                        </div>
+                      </>
+                  ) : (
+                      <div className="bg-stone-50 border border-stone-200 rounded-lg p-5 space-y-4">
+                          <p className="text-sm text-stone-600 mb-2">Please transfer the total amount to the following account. Your order will be shipped once funds are cleared.</p>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                  <span className="block text-xs font-bold text-stone-400 uppercase">Bank Name</span>
+                                  <span className="font-medium text-stone-900">{MERCHANT_BANK_DETAILS.bankName}</span>
+                              </div>
+                              <div>
+                                  <span className="block text-xs font-bold text-stone-400 uppercase">Account Name</span>
+                                  <span className="font-medium text-stone-900">{MERCHANT_BANK_DETAILS.accountName}</span>
+                              </div>
+                              <div>
+                                  <span className="block text-xs font-bold text-stone-400 uppercase">IBAN</span>
+                                  <div className="flex items-center gap-2">
+                                      <span className="font-mono text-stone-900 bg-white px-2 py-1 rounded border border-stone-200">{MERCHANT_BANK_DETAILS.iban}</span>
+                                      <Copy size={14} className="text-stone-400 cursor-pointer hover:text-emerald-800" />
+                                  </div>
+                              </div>
+                              <div>
+                                  <span className="block text-xs font-bold text-stone-400 uppercase">Swift/BIC</span>
+                                  <span className="font-mono text-stone-900 bg-white px-2 py-1 rounded border border-stone-200 inline-block">{MERCHANT_BANK_DETAILS.swiftCode}</span>
+                              </div>
+                          </div>
+                          
+                          <div className="bg-emerald-50 text-emerald-900 text-xs p-3 rounded mt-2 font-medium">
+                              Reference Message: <span className="font-mono font-bold select-all">ORDER {Math.floor(Math.random() * 10000)}</span>
+                          </div>
+                      </div>
+                  )}
 
                   <div className="bg-stone-50 p-4 rounded text-xs text-stone-500 flex gap-2 items-start mt-4">
                     <ShieldCheck size={16} className="text-emerald-700 flex-shrink-0 mt-0.5" />
@@ -208,7 +262,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
                       <ArrowLeft size={16} /> Back
                     </button>
                     <Button type="submit" disabled={isProcessing} className="w-2/3">
-                      {isProcessing ? 'Processing...' : `Pay €${(total + 37.50).toFixed(2)}`}
+                      {isProcessing ? 'Processing...' : (paymentMethod === 'card' ? `Pay €${(total + 37.50).toFixed(2)}` : 'Confirm Order')}
                     </Button>
                   </div>
                 </form>
@@ -224,8 +278,13 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
                 <p className="text-lg text-stone-600 mb-8">Thank you for your order.</p>
                 
                 <div className="bg-stone-50 p-6 rounded-lg max-w-sm w-full mb-8 text-left border border-stone-100">
-                  <p className="text-sm text-stone-500 mb-2">Order Reference: <span className="text-stone-900 font-mono">#ETH-{Math.floor(Math.random() * 10000)}</span></p>
-                  <p className="text-sm text-stone-500">A confirmation email has been sent to you. Your package will depart Addis Ababa within 24 hours.</p>
+                  <p className="text-sm text-stone-500 mb-2">Order Reference: <span className="text-stone-900 font-mono">#{orderRef}</span></p>
+                  <p className="text-sm text-stone-500">
+                    {paymentMethod === 'bank_transfer' 
+                        ? "Please complete your bank transfer using the reference number above. We will ship your items as soon as the funds clear."
+                        : "A confirmation email has been sent to you. Your package will depart Addis Ababa within 24 hours."
+                    }
+                  </p>
                 </div>
 
                 <Button onClick={onClose}>Return to Shop</Button>

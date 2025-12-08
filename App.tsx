@@ -97,9 +97,9 @@ const App: React.FC = () => {
           {/* Desktop Nav */}
           <nav className="hidden md:flex gap-8">
             <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-widest hover:text-eth-earth transition-colors ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-eth-earth border-b-2 border-eth-earth' : 'text-stone-600'}`}>Shop All</button>
-            <button onClick={() => navigateToShop(Category.FASHION)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Fashion</button>
+            <button onClick={() => navigateToShop(Category.CLOTHES)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Clothes</button>
             <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Art</button>
-            <button onClick={() => navigateToShop(Category.HOME)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Home</button>
+            <button onClick={() => navigateToShop(Category.MISC)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Miscellaneous</button>
           </nav>
 
           {/* Icons */}
@@ -134,9 +134,9 @@ const App: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-parchment border-b border-stone-200 py-4 px-4 space-y-4 shadow-lg">
            <button onClick={() => {navigateToShop(Category.ALL); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Shop All</button>
-           <button onClick={() => {navigateToShop(Category.FASHION); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Fashion</button>
+           <button onClick={() => {navigateToShop(Category.CLOTHES); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Clothes</button>
            <button onClick={() => {navigateToShop(Category.ART); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Art</button>
-           <button onClick={() => {navigateToShop(Category.HOME); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800">Home & Coffee</button>
+           <button onClick={() => {navigateToShop(Category.MISC); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800">Miscellaneous</button>
         </div>
       )}
     </header>
@@ -173,9 +173,9 @@ const App: React.FC = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { icon: Shirt, label: 'Traditional Fashion', cat: Category.FASHION, desc: 'Handwoven Tibeb & Modern Cuts', image: '/images/banners/fashion.png' },
+            { icon: Shirt, label: 'Clothes', cat: Category.CLOTHES, desc: 'Handwoven Tibeb & Modern Cuts', image: '/images/banners/fashion.png' },
             { icon: Palette, label: 'Fine Art & Icons', cat: Category.ART, desc: 'Coptic Art & Contemporary Canvas', image: '/images/banners/art.png' },
-            { icon: Coffee, label: 'Coffee Ceremony', cat: Category.HOME, desc: 'Jebena, Sini & Incense', image: '/images/banners/coffee.png' },
+            { icon: Coffee, label: 'Miscellaneous', cat: Category.MISC, desc: 'Coffee, Spices & Home Decor', image: '/images/banners/coffee.png' },
           ].map((item, idx) => (
             <div 
               key={idx} 

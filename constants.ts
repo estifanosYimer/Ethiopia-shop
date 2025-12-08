@@ -5,9 +5,9 @@ import { Category, Product } from './types';
  * 
  * IMAGE INSTRUCTIONS:
  * Ensure your local images are placed in the public/ folder matching these paths:
- * - public/images/fashion/
+ * - public/images/fashion/ (Maps to Clothes category)
  * - public/images/accessories/
- * - public/images/home/
+ * - public/images/home/ (Maps to Miscellaneous category)
  * - public/images/art/
  * - public/images/banners/ (For homepage categories)
  * 
@@ -15,13 +15,13 @@ import { Category, Product } from './types';
  */
 
 export const MOCK_PRODUCTS: Product[] = [
-  // --- FASHION ---
+  // --- CLOTHES (Formerly Fashion) ---
   {
     id: 'f1',
     name: 'Royal Habesha Kemis',
     price: 280,
     currency: '€',
-    category: Category.FASHION,
+    category: Category.CLOTHES,
     description: 'Exquisite handwoven cotton dress with gold-thread Tibeb embroidery.',
     detailedHistory: 'Worn for weddings and Timkat festivals, this Kemis represents the pinnacle of Ethiopian weaving (Shemma). The gold threads are woven into the cotton using a technique passed down for centuries.',
     imageUrl: '/images/fashion/royal-habesha-kemis.png',
@@ -32,7 +32,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Men’s Traditional Telet Suit',
     price: 150,
     currency: '€',
-    category: Category.FASHION,
+    category: Category.CLOTHES,
     description: 'Crisp white cotton tunic and trousers with national tricolor trim.',
     detailedHistory: 'A staple for Ethiopian men during holidays. The pure white cotton symbolizes purity, while the clean lines offer timeless elegance suitable for both church services and modern gatherings.',
     imageUrl: '/images/fashion/mens-telet-suit.png',
@@ -43,7 +43,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Handwoven Netela Scarf',
     price: 45,
     currency: '€',
-    category: Category.FASHION,
+    category: Category.CLOTHES,
     description: 'Lightweight, gauze-like cotton scarf with colorful border.',
     detailedHistory: 'The Netela is worn daily by Ethiopian women. It is incredibly versatile, used as a headwrap, a shawl, or a sash. The intricate border pattern (Tibeb) indicates the wearer’s region.',
     imageUrl: '/images/fashion/netela-scarf.png',
@@ -54,7 +54,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Heavy Cotton Gabi',
     price: 85,
     currency: '€',
-    category: Category.FASHION,
+    category: Category.CLOTHES,
     description: 'Thick, four-layer cotton blanket wrap for cold evenings.',
     detailedHistory: 'While the Netela is for the day, the Gabi is for the cold highland nights. It is essentially a wearable blanket, woven with thicker cotton threads to trap heat.',
     imageUrl: '/images/fashion/cotton-gabi.png',
@@ -65,7 +65,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Modern Tibeb Bomber Jacket',
     price: 120,
     currency: '€',
-    category: Category.FASHION,
+    category: Category.CLOTHES,
     description: 'Urban streetwear fused with traditional weaving patterns.',
     detailedHistory: 'Designed by young Addis Ababa creatives, this jacket features authentic Tibeb strips sewn onto high-quality modern fabrics, bridging the gap between heritage and hip-hop culture.',
     imageUrl: '/images/fashion/tibeb-bomber.png',
@@ -76,7 +76,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Wollo Raya Dress',
     price: 220,
     currency: '€',
-    category: Category.FASHION,
+    category: Category.CLOTHES,
     description: 'Distinctive black and gold dress style from the Wollo region.',
     detailedHistory: 'Unlike the typical white Shemma, the Raya style is bold and colorful, often accessorized with heavy jewelry. It reflects the vibrant culture of Northern Ethiopia.',
     imageUrl: '/images/fashion/wollo-raya-dress.png',
@@ -129,13 +129,13 @@ export const MOCK_PRODUCTS: Product[] = [
     inStock: true,
   },
 
-  // --- HOME & COFFEE ---
+  // --- MISCELLANEOUS PRODUCTS (Formerly Home & Coffee) ---
   {
     id: 'h1',
     name: 'Traditional Jebena Pot',
     price: 45,
     currency: '€',
-    category: Category.HOME,
+    category: Category.MISC,
     description: 'Black clay pottery used for brewing traditional coffee.',
     detailedHistory: 'The Jebena is the centerpiece of the coffee ceremony. Its spherical bottom allows grounds to settle, while the long neck pours clear, strong coffee.',
     imageUrl: '/images/home/jebena-pot.png',
@@ -146,7 +146,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Sini Coffee Cups (Set of 6)',
     price: 35,
     currency: '€',
-    category: Category.HOME,
+    category: Category.MISC,
     description: 'Small, handleless porcelain cups with traditional motifs.',
     detailedHistory: 'Coffee (Buna) is always drunk in company. These small cups ensure that the coffee is consumed quickly while hot, usually in three rounds: Abol, Tona, and Baraka.',
     imageUrl: '/images/home/sini-cups.png',
@@ -157,7 +157,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Harar Mesob Basket',
     price: 110,
     currency: '€',
-    category: Category.HOME,
+    category: Category.MISC,
     description: 'Large, colorful woven basket table with lid.',
     detailedHistory: 'The Mesob serves as a dining table. Friends and family gather around it to share a meal from a single platter, symbolizing unity and brotherhood.',
     imageUrl: '/images/home/harar-mesob.png',
@@ -168,7 +168,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Yirgacheffe Coffee Beans (1kg)',
     price: 38,
     currency: '€',
-    category: Category.HOME,
+    category: Category.MISC,
     description: 'Premium single-origin beans, floral and citrus notes.',
     detailedHistory: 'Yirgacheffe is considered the birthplace of coffee. These beans are washed and sun-dried, offering a light, tea-like body with distinct jasmine aromas.',
     imageUrl: '/images/home/yirgacheffe-beans.png',
@@ -179,7 +179,7 @@ export const MOCK_PRODUCTS: Product[] = [
     name: 'Frankincense & Myrrh Gift Set',
     price: 28,
     currency: '€',
-    category: Category.HOME,
+    category: Category.MISC,
     description: 'High-grade resin incense from the Tigray region.',
     detailedHistory: 'Incense is burned during coffee ceremonies to purify the air. This set includes a traditional clay burner and resin harvested from Boswellia trees.',
     imageUrl: '/images/home/incense-set.png',

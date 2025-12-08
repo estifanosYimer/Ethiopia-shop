@@ -1,8 +1,8 @@
 export enum Category {
   ALL = 'All',
-  FASHION = 'Fashion',
+  CLOTHES = 'Clothes',
   ART = 'Art',
-  HOME = 'Home & Coffee',
+  MISC = 'Miscellaneous Products',
   ACCESSORIES = 'Accessories'
 }
 
