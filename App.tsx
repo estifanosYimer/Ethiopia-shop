@@ -158,6 +158,7 @@ const App: React.FC = () => {
               <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-widest hover:text-eth-earth transition-colors ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-eth-earth border-b-2 border-eth-earth' : 'text-stone-600'}`}>Shop All</button>
               <button onClick={() => navigateToShop(Category.CLOTHES)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Clothes</button>
               <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Art</button>
+              <button onClick={() => navigateToShop(Category.ACCESSORIES)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Accessories</button>
               <button onClick={() => navigateToShop(Category.MISC)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Miscellaneous</button>
             </nav>
           ) : (
@@ -223,6 +224,7 @@ const App: React.FC = () => {
            <button onClick={() => {navigateToShop(Category.ALL); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Shop All</button>
            <button onClick={() => {navigateToShop(Category.CLOTHES); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Clothes</button>
            <button onClick={() => {navigateToShop(Category.ART); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Art</button>
+           <button onClick={() => {navigateToShop(Category.ACCESSORIES); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Accessories</button>
            <button onClick={() => {navigateToShop(Category.MISC); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800">Miscellaneous</button>
         </div>
       )}
