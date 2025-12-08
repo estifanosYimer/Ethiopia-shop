@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight as ArrowRightIcon } from 'lucide-react';
 import { MOCK_PRODUCTS } from './constants';
 import { Product, CartItem, Category } from './types';
@@ -22,13 +22,47 @@ const App: React.FC = () => {
   const [infoModalType, setInfoModalType] = useState<InfoModalType>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Search State
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Admin Shortcut Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Ctrl + Shift + A (for Admin)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'A') {
+        e.preventDefault();
+        setIsOrdersOpen(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Computed
   const filteredProducts = useMemo(() => {
-    return selectedCategory === Category.ALL 
-      ? MOCK_PRODUCTS 
-      : MOCK_PRODUCTS.filter(p => p.category === selectedCategory);
-  }, [selectedCategory]);
+    let products = MOCK_PRODUCTS;
+
+    // Filter by category if not All AND not searching (search usually overrides category, or we can combine)
+    // Let's allow searching within a category if a category is specifically selected, otherwise search all.
+    if (selectedCategory !== Category.ALL) {
+      products = products.filter(p => p.category === selectedCategory);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      products = products.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        p.description.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q)
+      );
+    }
+    
+    return products;
+  }, [selectedCategory, searchQuery]);
 
   // Handlers
   const handleAddToCart = (product: Product) => {
@@ -74,7 +108,29 @@ const App: React.FC = () => {
   const navigateToShop = (category: Category = Category.ALL) => {
     setSelectedCategory(category);
     setCurrentView('shop');
+    setSearchQuery(''); // Reset search when clicking nav
+    setIsSearchActive(false);
     window.scrollTo(0, 0);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    // Automatically switch to shop view if typing
+    if (currentView !== 'shop') {
+      setCurrentView('shop');
+      // If we are on home, maybe we want to search ALL categories by default
+      if (currentView === 'home') setSelectedCategory(Category.ALL);
+    }
+  };
+
+  const toggleSearch = () => {
+    if (isSearchActive) {
+      setIsSearchActive(false);
+      setSearchQuery('');
+    } else {
+      setIsSearchActive(true);
+      // Focus logic would ideally go here with a ref
+    }
   };
 
   const openInfoModal = (type: InfoModalType) => {
@@ -90,23 +146,42 @@ const App: React.FC = () => {
           {/* Logo */}
           <div 
             className="flex flex-col cursor-pointer group" 
-            onClick={() => setCurrentView('home')}
+            onClick={() => { setCurrentView('home'); setSearchQuery(''); setIsSearchActive(false); }}
           >
             <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight group-hover:text-eth-earth transition-colors">ABYSSINIA <span className="text-eth-earth">DIRECT</span></h1>
             <span className="text-[10px] text-stone-500 uppercase tracking-[0.2em] hidden sm:block">Addis Ababa • Paris • Berlin</span>
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex gap-8">
-            <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-widest hover:text-eth-earth transition-colors ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-eth-earth border-b-2 border-eth-earth' : 'text-stone-600'}`}>Shop All</button>
-            <button onClick={() => navigateToShop(Category.CLOTHES)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Clothes</button>
-            <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Art</button>
-            <button onClick={() => navigateToShop(Category.MISC)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Miscellaneous</button>
-          </nav>
+          {!isSearchActive ? (
+            <nav className="hidden md:flex gap-8">
+              <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-widest hover:text-eth-earth transition-colors ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-eth-earth border-b-2 border-eth-earth' : 'text-stone-600'}`}>Shop All</button>
+              <button onClick={() => navigateToShop(Category.CLOTHES)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Clothes</button>
+              <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Art</button>
+              <button onClick={() => navigateToShop(Category.MISC)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Miscellaneous</button>
+            </nav>
+          ) : (
+            <div className="hidden md:flex flex-1 max-w-lg mx-8 animate-fade-in relative">
+              <input 
+                type="text" 
+                placeholder="Search collection..." 
+                autoFocus
+                className="w-full bg-stone-50 border-b-2 border-emerald-900 px-4 py-2 text-stone-900 focus:outline-none placeholder:text-stone-400 font-serif"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+              <button onClick={toggleSearch} className="absolute right-0 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-900">
+                <X size={18} />
+              </button>
+            </div>
+          )}
 
           {/* Icons */}
           <div className="flex items-center gap-5">
-            <button className="text-stone-600 hover:text-stone-900 hidden sm:block">
+            <button 
+              className={`hover:text-stone-900 hidden sm:block transition-colors ${isSearchActive ? 'text-emerald-900' : 'text-stone-600'}`}
+              onClick={toggleSearch}
+            >
               <Search size={20} />
             </button>
             <div className="relative">
@@ -135,6 +210,16 @@ const App: React.FC = () => {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-parchment border-b border-stone-200 py-4 px-4 space-y-4 shadow-lg">
+           <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                className="w-full bg-white border border-stone-200 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-900"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+           </div>
            <button onClick={() => {navigateToShop(Category.ALL); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Shop All</button>
            <button onClick={() => {navigateToShop(Category.CLOTHES); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Clothes</button>
            <button onClick={() => {navigateToShop(Category.ART); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Art</button>
@@ -320,28 +405,45 @@ const App: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
               <div>
                 <h1 className="text-4xl font-serif font-bold mb-2">
-                    {selectedCategory === Category.ALL ? 'Full Collection' : selectedCategory}
+                    {searchQuery ? `Search results for "${searchQuery}"` : (selectedCategory === Category.ALL ? 'Full Collection' : selectedCategory)}
                 </h1>
-                <p className="text-stone-500">Discover authentic Ethiopian craftsmanship.</p>
+                <p className="text-stone-500">{filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'} found.</p>
               </div>
               
-              <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
-                {Object.values(Category).map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${selectedCategory === cat ? 'bg-eth-earth text-white shadow-lg transform scale-105' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:border-emerald-200'}`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
+              {!searchQuery && (
+                <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
+                  {Object.values(Category).map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${selectedCategory === cat ? 'bg-eth-earth text-white shadow-lg transform scale-105' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:border-emerald-200'}`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            <ProductList 
-              products={filteredProducts} 
-              onProductClick={navigateToProduct}
-              onAddToCart={handleAddToCart}
-            />
+            
+            {filteredProducts.length > 0 ? (
+                <ProductList 
+                products={filteredProducts} 
+                onProductClick={navigateToProduct}
+                onAddToCart={handleAddToCart}
+                />
+            ) : (
+                <div className="text-center py-20 bg-white border border-stone-100 rounded-lg">
+                    <Search className="mx-auto h-12 w-12 text-stone-300 mb-4" />
+                    <h3 className="text-lg font-medium text-stone-900">No items found</h3>
+                    <p className="text-stone-500 mt-2">Try adjusting your search terms or browse our full collection.</p>
+                    <Button 
+                        className="mt-6" 
+                        onClick={() => {setSearchQuery(''); setIsSearchActive(false); setSelectedCategory(Category.ALL)}}
+                    >
+                        Reset Search
+                    </Button>
+                </div>
+            )}
           </div>
         )}
 
@@ -392,8 +494,7 @@ const App: React.FC = () => {
           <div className="flex gap-4 items-center">
               <span>Privacy Policy</span>
               <span>Terms of Service</span>
-              <span className="w-1 h-1 bg-stone-700 rounded-full"></span>
-              <button onClick={() => setIsOrdersOpen(true)} className="hover:text-gold-accent transition-colors">Merchant Login</button>
+              {/* Hidden Admin Trigger - Accessible via Ctrl+Shift+A */}
           </div>
         </div>
       </footer>

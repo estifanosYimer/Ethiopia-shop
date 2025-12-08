@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, RefreshCw, Archive, MapPin, CreditCard, ShoppingBag, Package } from 'lucide-react';
+import { X, RefreshCw, Archive, MapPin, CreditCard, ShoppingBag, Package, Lock, Mail, Phone } from 'lucide-react';
 import { getOrders, clearOrders } from '../services/orderService';
 import { Order } from '../types';
 import Button from './Button';
@@ -13,6 +13,11 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  
+  // Authorization State
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [pin, setPin] = useState('');
+  const [authError, setAuthError] = useState(false);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -22,10 +27,18 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isAuthorized) {
       fetchOrders();
     }
-  }, [isOpen]);
+    
+    // Reset auth if modal is closed long enough? 
+    // For now, let's keep auth session valid until refresh or maybe reset on close
+    if(!isOpen) {
+        // Optional: Reset auth on close to be stricter
+        // setIsAuthorized(false); 
+        // setPin('');
+    }
+  }, [isOpen, isAuthorized]);
 
   const handleClear = async () => {
       if(window.confirm('Are you sure you want to delete all order history?')) {
@@ -34,8 +47,51 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
       }
   };
 
+  const handleAuth = (e: React.FormEvent) => {
+      e.preventDefault();
+      // Simple hardcoded PIN for demonstration
+      if (pin === '1234') {
+          setIsAuthorized(true);
+          setAuthError(false);
+      } else {
+          setAuthError(true);
+          setPin('');
+      }
+  };
+
   if (!isOpen) return null;
 
+  // --- UNAUTHORIZED VIEW ---
+  if (!isAuthorized) {
+      return (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-stone-900/90 backdrop-blur-md" onClick={onClose}></div>
+            <div className="relative w-full max-w-sm bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center animate-fade-in">
+                <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mb-6 text-stone-600">
+                    <Lock size={32} />
+                </div>
+                <h2 className="text-xl font-serif font-bold text-stone-900 mb-2">Restricted Access</h2>
+                <p className="text-sm text-stone-500 mb-6 text-center">Please enter your merchant PIN to access the order dashboard.</p>
+                
+                <form onSubmit={handleAuth} className="w-full space-y-4">
+                    <input 
+                        type="password" 
+                        value={pin}
+                        onChange={(e) => setPin(e.target.value)}
+                        placeholder="Enter PIN (1234)"
+                        autoFocus
+                        className="w-full text-center tracking-[0.5em] text-2xl p-3 border border-stone-300 rounded focus:ring-2 focus:ring-emerald-900 outline-none"
+                    />
+                    {authError && <p className="text-red-600 text-xs text-center font-bold">Incorrect PIN</p>}
+                    <Button type="submit" className="w-full">Unlock Dashboard</Button>
+                </form>
+                <button onClick={onClose} className="mt-4 text-stone-400 hover:text-stone-600 text-sm">Cancel</button>
+            </div>
+        </div>
+      );
+  }
+
+  // --- AUTHORIZED DASHBOARD ---
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-stone-900/80 backdrop-blur-sm" onClick={onClose}></div>
@@ -108,6 +164,9 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
                                         </h4>
                                         <div className="bg-white p-4 rounded border border-stone-200 text-sm space-y-2 text-stone-600">
                                             <p><span className="font-bold">Name:</span> {order.shippingDetails.firstName} {order.shippingDetails.lastName}</p>
+                                            <p className="flex items-center gap-2"><Mail size={12} className="text-stone-400"/> {order.shippingDetails.email}</p>
+                                            <p className="flex items-center gap-2"><Phone size={12} className="text-stone-400"/> {order.shippingDetails.phone}</p>
+                                            <div className="h-px bg-stone-100 my-2"></div>
                                             <p><span className="font-bold">Address:</span> {order.shippingDetails.address}</p>
                                             <p><span className="font-bold">Location:</span> {order.shippingDetails.city}, {order.shippingDetails.postalCode}</p>
                                             <p><span className="font-bold">Country:</span> {order.shippingDetails.country}</p>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy, Loader2 } from 'lucide-react';
+import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy, Loader2, Mail, Phone } from 'lucide-react';
 import Button from './Button';
 import { CartItem, ShippingDetails, Order } from '../types';
 import ImageWithFallback from './ImageWithFallback';
@@ -13,6 +13,13 @@ const MERCHANT_BANK_DETAILS = {
     swiftCode: "CBETETAA", 
     iban: "ET00CBET1000012345678"
 };
+
+const EU_COUNTRIES = [
+    "Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", 
+    "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", 
+    "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", 
+    "Poland", "Portugal", "Romania", "Slovakia", "Slovenia", "Spain", "Sweden"
+];
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -37,8 +44,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
       setStep('shipping');
       setPaymentMethod('card');
       setIsProcessing(false);
-      // We purposefully don't clear shippingData immediately so it persists if they reopen, 
-      // but in a real app you might want to.
     } else {
         // Generate a new reference for the session
         setOrderRef(`ETH-${Math.floor(Math.random() * 100000)}`);
@@ -59,6 +64,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
     setShippingData({
         firstName: formData.get('firstName') as string,
         lastName: formData.get('lastName') as string,
+        email: formData.get('email') as string,
+        phone: formData.get('phone') as string,
         address: formData.get('address') as string,
         city: formData.get('city') as string,
         postalCode: formData.get('postalCode') as string,
@@ -185,6 +192,19 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
              <div className="animate-fade-in">
                <h2 className="text-2xl font-serif font-bold text-stone-900 mb-6">Shipping Address</h2>
                <form className="space-y-4" onSubmit={handleShippingSubmit}>
+                 {/* Contact Info */}
+                 <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-1">
+                     <label className="text-xs font-bold text-stone-500 uppercase flex items-center gap-1"><Mail size={12}/> Email Address</label>
+                     <input required name="email" defaultValue={shippingData?.email} type="email" placeholder="you@example.com" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                   </div>
+                   <div className="space-y-1">
+                     <label className="text-xs font-bold text-stone-500 uppercase flex items-center gap-1"><Phone size={12}/> Phone Number</label>
+                     <input required name="phone" defaultValue={shippingData?.phone} type="tel" placeholder="+32 ..." className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                   </div>
+                 </div>
+
+                 {/* Name */}
                  <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-1">
                      <label className="text-xs font-bold text-stone-500 uppercase">First Name</label>
@@ -195,6 +215,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
                      <input required name="lastName" defaultValue={shippingData?.lastName} type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
                    </div>
                  </div>
+
+                 {/* Address */}
                  <div className="space-y-1">
                    <label className="text-xs font-bold text-stone-500 uppercase">Address</label>
                    <input required name="address" defaultValue={shippingData?.address} type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
@@ -210,13 +232,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
                    </div>
                  </div>
                  <div className="space-y-1">
-                   <label className="text-xs font-bold text-stone-500 uppercase">Country</label>
+                   <label className="text-xs font-bold text-stone-500 uppercase">Country (EU)</label>
                    <select name="country" defaultValue={shippingData?.country || 'Germany'} className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none bg-white">
-                     <option value="France">France</option>
-                     <option value="Germany">Germany</option>
-                     <option value="Belgium">Belgium</option>
-                     <option value="Netherlands">Netherlands</option>
-                     <option value="United Kingdom">United Kingdom</option>
+                     {EU_COUNTRIES.map(country => (
+                        <option key={country} value={country}>{country}</option>
+                     ))}
                    </select>
                  </div>
                  <div className="pt-6 flex justify-end">
