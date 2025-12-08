@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy } from 'lucide-react';
 import Button from './Button';
 import { CartItem } from '../types';
@@ -28,6 +28,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
   const [step, setStep] = useState<CheckoutStep>('shipping');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Reset state when modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setStep('shipping');
+      setPaymentMethod('card');
+      setIsProcessing(false);
+    }
+  }, [isOpen]);
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const orderRef = `ETH-${Math.floor(Math.random() * 10000)}`;
