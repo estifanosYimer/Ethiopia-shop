@@ -7,6 +7,7 @@ import CartSidebar from './components/CartSidebar';
 import CuratorChat from './components/CuratorChat';
 import CheckoutModal from './components/CheckoutModal';
 import InfoModal, { InfoModalType } from './components/InfoModal';
+import OrdersModal from './components/OrdersModal';
 import Button from './components/Button';
 import ImageWithFallback from './components/ImageWithFallback';
 
@@ -17,6 +18,7 @@ const App: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [infoModalType, setInfoModalType] = useState<InfoModalType>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -387,9 +389,11 @@ const App: React.FC = () => {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-stone-800 text-xs text-center flex justify-between items-center text-stone-500">
           <p>© 2024 Abyssinia Direct. All Rights Reserved.</p>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
               <span>Privacy Policy</span>
               <span>Terms of Service</span>
+              <span className="w-1 h-1 bg-stone-700 rounded-full"></span>
+              <button onClick={() => setIsOrdersOpen(true)} className="hover:text-gold-accent transition-colors">Merchant Login</button>
           </div>
         </div>
       </footer>
@@ -408,6 +412,11 @@ const App: React.FC = () => {
         onClose={() => setIsCheckoutOpen(false)}
         cart={cart}
         onComplete={handleCheckoutComplete}
+      />
+
+      <OrdersModal
+        isOpen={isOrdersOpen}
+        onClose={() => setIsOrdersOpen(false)}
       />
 
       <InfoModal 

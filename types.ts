@@ -27,3 +27,25 @@ export interface ChatMessage {
   text: string;
   isError?: boolean;
 }
+
+export interface ShippingDetails {
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface Order {
+  id: string;
+  date: string;
+  items: CartItem[];
+  subtotal: number;
+  shippingCost: number;
+  duties: number;
+  total: number;
+  shippingDetails: ShippingDetails;
+  paymentMethod: 'card' | 'bank_transfer';
+  status: 'pending' | 'shipped';
+}

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy } from 'lucide-react';
+import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy, Loader2 } from 'lucide-react';
 import Button from './Button';
-import { CartItem } from '../types';
+import { CartItem, ShippingDetails, Order } from '../types';
 import ImageWithFallback from './ImageWithFallback';
+import { saveOrder } from '../services/orderService';
 
 // --- MERCHANT BANK DETAILS ---
-// Replace these with your actual account information
 const MERCHANT_BANK_DETAILS = {
     bankName: "Commercial Bank of Ethiopia",
     accountName: "Abyssinia Direct Exports",
-    accountNumber: "1000012345678", // Replace with real account number
-    swiftCode: "CBETETAA", // Replace with real Swift
-    iban: "ET00CBET1000012345678" // Replace with real IBAN
+    accountNumber: "1000012345678", 
+    swiftCode: "CBETETAA", 
+    iban: "ET00CBET1000012345678"
 };
 
 interface CheckoutModalProps {
@@ -28,6 +28,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
   const [step, setStep] = useState<CheckoutStep>('shipping');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [shippingData, setShippingData] = useState<ShippingDetails | null>(null);
+  const [orderRef, setOrderRef] = useState('');
 
   // Reset state when modal is closed
   useEffect(() => {
@@ -35,22 +37,66 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
       setStep('shipping');
       setPaymentMethod('card');
       setIsProcessing(false);
+      // We purposefully don't clear shippingData immediately so it persists if they reopen, 
+      // but in a real app you might want to.
+    } else {
+        // Generate a new reference for the session
+        setOrderRef(`ETH-${Math.floor(Math.random() * 100000)}`);
     }
   }, [isOpen]);
 
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const orderRef = `ETH-${Math.floor(Math.random() * 10000)}`;
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shippingCost = 25.00;
+  const importDuties = 12.50;
+  const total = subtotal + shippingCost + importDuties;
 
   if (!isOpen) return null;
 
+  const handleShippingSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    setShippingData({
+        firstName: formData.get('firstName') as string,
+        lastName: formData.get('lastName') as string,
+        address: formData.get('address') as string,
+        city: formData.get('city') as string,
+        postalCode: formData.get('postalCode') as string,
+        country: formData.get('country') as string,
+    });
+    
+    setStep('payment');
+  };
+
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!shippingData) return;
+
     setIsProcessing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-    setStep('confirmation');
-    onComplete(); // Clears cart in parent
+    
+    const newOrder: Order = {
+        id: orderRef,
+        date: new Date().toISOString(),
+        items: cart,
+        subtotal,
+        shippingCost,
+        duties: importDuties,
+        total,
+        shippingDetails: shippingData,
+        paymentMethod: paymentMethod,
+        status: 'pending'
+    };
+
+    try {
+        await saveOrder(newOrder);
+        setIsProcessing(false);
+        setStep('confirmation');
+        onComplete(); // Clears cart in parent
+    } catch (error) {
+        console.error("Payment failed", error);
+        setIsProcessing(false);
+        alert("There was an issue processing your order. Please try again.");
+    }
   };
 
   const Steps = () => (
@@ -105,20 +151,20 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
           <div className="border-t border-stone-200 pt-4 space-y-2 text-sm">
             <div className="flex justify-between text-stone-600">
               <span>Subtotal</span>
-              <span>€{total.toFixed(2)}</span>
+              <span>€{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-stone-600">
               <span>Shipping (Ethiopian Airlines Cargo)</span>
-              <span>€25.00</span>
+              <span>€{shippingCost.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-stone-600">
               <span>Import Duties</span>
-              <span>€12.50</span>
+              <span>€{importDuties.toFixed(2)}</span>
             </div>
           </div>
           <div className="border-t border-stone-200 pt-4 mt-4 flex justify-between items-center">
             <span className="font-serif font-bold text-lg text-stone-900">Total</span>
-            <span className="font-serif font-bold text-xl text-emerald-900">€{(total + 37.50).toFixed(2)}</span>
+            <span className="font-serif font-bold text-xl text-emerald-900">€{total.toFixed(2)}</span>
           </div>
         </div>
 
@@ -138,39 +184,39 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
            {step === 'shipping' && (
              <div className="animate-fade-in">
                <h2 className="text-2xl font-serif font-bold text-stone-900 mb-6">Shipping Address</h2>
-               <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setStep('payment'); }}>
+               <form className="space-y-4" onSubmit={handleShippingSubmit}>
                  <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-1">
                      <label className="text-xs font-bold text-stone-500 uppercase">First Name</label>
-                     <input required type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                     <input required name="firstName" defaultValue={shippingData?.firstName} type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
                    </div>
                    <div className="space-y-1">
                      <label className="text-xs font-bold text-stone-500 uppercase">Last Name</label>
-                     <input required type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                     <input required name="lastName" defaultValue={shippingData?.lastName} type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
                    </div>
                  </div>
                  <div className="space-y-1">
                    <label className="text-xs font-bold text-stone-500 uppercase">Address</label>
-                   <input required type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                   <input required name="address" defaultValue={shippingData?.address} type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-1">
                      <label className="text-xs font-bold text-stone-500 uppercase">City</label>
-                     <input required type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                     <input required name="city" defaultValue={shippingData?.city} type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
                    </div>
                    <div className="space-y-1">
                      <label className="text-xs font-bold text-stone-500 uppercase">Postal Code</label>
-                     <input required type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                     <input required name="postalCode" defaultValue={shippingData?.postalCode} type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
                    </div>
                  </div>
                  <div className="space-y-1">
                    <label className="text-xs font-bold text-stone-500 uppercase">Country</label>
-                   <select className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none bg-white">
-                     <option>France</option>
-                     <option>Germany</option>
-                     <option>Belgium</option>
-                     <option>Netherlands</option>
-                     <option>United Kingdom</option>
+                   <select name="country" defaultValue={shippingData?.country || 'Germany'} className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none bg-white">
+                     <option value="France">France</option>
+                     <option value="Germany">Germany</option>
+                     <option value="Belgium">Belgium</option>
+                     <option value="Netherlands">Netherlands</option>
+                     <option value="United Kingdom">United Kingdom</option>
                    </select>
                  </div>
                  <div className="pt-6 flex justify-end">
@@ -256,7 +302,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
                           </div>
                           
                           <div className="bg-emerald-50 text-emerald-900 text-xs p-3 rounded mt-2 font-medium">
-                              Reference Message: <span className="font-mono font-bold select-all">ORDER {Math.floor(Math.random() * 10000)}</span>
+                              Reference Message: <span className="font-mono font-bold select-all">ORDER {orderRef}</span>
                           </div>
                       </div>
                   )}
@@ -270,8 +316,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
                     <button type="button" onClick={() => setStep('shipping')} className="text-stone-500 hover:text-stone-900 flex items-center gap-1 text-sm font-medium">
                       <ArrowLeft size={16} /> Back
                     </button>
-                    <Button type="submit" disabled={isProcessing} className="w-2/3">
-                      {isProcessing ? 'Processing...' : (paymentMethod === 'card' ? `Pay €${(total + 37.50).toFixed(2)}` : 'Confirm Order')}
+                    <Button type="submit" disabled={isProcessing} className="w-2/3 flex items-center justify-center gap-2">
+                      {isProcessing ? <><Loader2 size={16} className="animate-spin"/> Processing...</> : (paymentMethod === 'card' ? `Pay €${total.toFixed(2)}` : 'Confirm Order')}
                     </Button>
                   </div>
                 </form>
