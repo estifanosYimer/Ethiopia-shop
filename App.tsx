@@ -173,9 +173,9 @@ const App: React.FC = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { icon: Shirt, label: 'Traditional Fashion', cat: Category.FASHION, desc: 'Handwoven Tibeb & Modern Cuts', image: '/images/categories/fashion-cat.png' },
-            { icon: Palette, label: 'Fine Art & Icons', cat: Category.ART, desc: 'Coptic Art & Contemporary Canvas', image: '/images/categories/art-cat.png' },
-            { icon: Coffee, label: 'Coffee Ceremony', cat: Category.HOME, desc: 'Jebena, Sini & Incense', image: '/images/categories/coffee-cat.png' },
+            { icon: Shirt, label: 'Traditional Fashion', cat: Category.FASHION, desc: 'Handwoven Tibeb & Modern Cuts', image: '/images/banners/fashion.png' },
+            { icon: Palette, label: 'Fine Art & Icons', cat: Category.ART, desc: 'Coptic Art & Contemporary Canvas', image: '/images/banners/art.png' },
+            { icon: Coffee, label: 'Coffee Ceremony', cat: Category.HOME, desc: 'Jebena, Sini & Incense', image: '/images/banners/coffee.png' },
           ].map((item, idx) => (
             <div 
               key={idx} 
