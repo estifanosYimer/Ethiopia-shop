@@ -1,5 +1,19 @@
 import { Category, Product } from './types';
 
+/**
+ * PRODUCT CATALOG
+ * 
+ * IMAGE INSTRUCTIONS:
+ * Ensure your local images are placed in the public/ folder matching these paths:
+ * - public/images/fashion/
+ * - public/images/accessories/
+ * - public/images/home/
+ * - public/images/art/
+ * - public/images/banners/ (For homepage categories)
+ * 
+ * File extensions must be .png (or update the strings below).
+ */
+
 export const MOCK_PRODUCTS: Product[] = [
   // --- FASHION ---
   {
