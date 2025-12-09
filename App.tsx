@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight as ArrowRightIcon } from 'lucide-react';
 import { MOCK_PRODUCTS } from './constants';
 import { Product, CartItem, Category, LanguageCode } from './types';
@@ -38,10 +38,22 @@ const AppContent: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
   
   // Search State
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Close language menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+            setIsLangMenuOpen(false);
+        }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Admin Shortcut Listener
   useEffect(() => {
@@ -224,7 +236,7 @@ const AppContent: React.FC = () => {
           {/* Icons & Language */}
           <div className="flex items-center gap-3 sm:gap-5">
             {/* Language Selector Desktop */}
-            <div className="relative hidden md:block">
+            <div className="relative hidden md:block" ref={langMenuRef}>
                 <button 
                   onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
                   className="flex items-center gap-1 text-stone-600 hover:text-emerald-900 font-bold uppercase text-xs"
