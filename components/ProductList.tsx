@@ -14,14 +14,13 @@ interface ProductListProps {
 const ProductList: React.FC<ProductListProps> = ({ products, onProductClick, onAddToCart }) => {
   const { t } = useLanguage();
 
-  const getCategoryTranslation = (category: string) => {
-    // Basic mapping based on enum convention or string value
-    if (category === 'Clothes') return t('nav_clothes');
-    if (category === 'Art') return t('nav_art');
-    if (category === 'Accessories') return t('nav_accessories');
-    if (category.includes('Misc')) return t('nav_misc');
-    // Fallback for direct matches if keys exist
-    return t(`nav_${category.toLowerCase().replace(' ', '_')}`) || category;
+  const getCategoryKey = (category: string) => {
+    // Helper to generate consistent keys for categories
+    if (category === 'Clothes') return 'nav_clothes';
+    if (category === 'Art') return 'nav_art';
+    if (category === 'Accessories') return 'nav_accessories';
+    if (category.includes('Misc')) return 'nav_misc';
+    return `nav_${category.toLowerCase().replace(' ', '_')}`;
   };
 
   return (
@@ -56,9 +55,12 @@ const ProductList: React.FC<ProductListProps> = ({ products, onProductClick, onA
           
           <div className="p-6 flex-1 flex flex-col">
             <div onClick={() => onProductClick(product)} className="cursor-pointer mb-3">
-               <div className="text-[10px] uppercase tracking-widest text-emerald-800 font-bold mb-1">
-                 {getCategoryTranslation(product.category)}
-               </div>
+               <AutoTranslatedText 
+                 as="div"
+                 className="text-[10px] uppercase tracking-widest text-emerald-800 font-bold mb-1"
+                 value={product.category}
+                 translationKey={getCategoryKey(product.category)}
+               />
                <AutoTranslatedText 
                  as="h3" 
                  className="font-serif text-xl font-bold text-stone-900 group-hover:text-emerald-800 transition-colors"

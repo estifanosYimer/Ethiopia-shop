@@ -67,6 +67,14 @@ const AppContent: React.FC = () => {
       }
   };
 
+  const getCategoryKey = (category: string) => {
+    if (category === 'Clothes') return 'nav_clothes';
+    if (category === 'Art') return 'nav_art';
+    if (category === 'Accessories') return 'nav_accessories';
+    if (category.includes('Misc')) return 'nav_misc';
+    return `nav_${category.toLowerCase().replace(' ', '_')}`;
+  };
+
   // Computed
   const filteredProducts = useMemo(() => {
     let products = MOCK_PRODUCTS;
@@ -402,7 +410,12 @@ const AppContent: React.FC = () => {
             <div className="flex flex-col justify-center pt-8">
             <div className="flex items-center gap-2 mb-4">
                 <span className="h-px w-8 bg-eth-earth"></span>
-                <span className="text-eth-earth font-bold tracking-widest uppercase text-xs">{getCategoryTranslation(product.category)}</span>
+                <AutoTranslatedText 
+                 as="span"
+                 className="text-eth-earth font-bold tracking-widest uppercase text-xs"
+                 value={product.category}
+                 translationKey={getCategoryKey(product.category)}
+               />
             </div>
             
             <AutoTranslatedText 

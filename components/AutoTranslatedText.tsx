@@ -16,7 +16,7 @@ const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({
   className = '', 
   as: Component = 'span' 
 }) => {
-  const { language, t } = useLanguage();
+  const { language, getExactTranslation } = useLanguage();
   const [translatedContent, setTranslatedContent] = useState<string>(value);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,12 +27,13 @@ const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({
       return;
     }
 
-    // 2. Try to get it from i18n (Static Dictionary)
+    // 2. Try to get it from i18n (Strict Check)
+    // We do NOT use t() because it falls back to English.
+    // We want to detect if the translation is MISSING in the current language.
     if (translationKey) {
-      const staticTranslation = t(translationKey);
-      // If t() returns something different than the key, it means a translation exists
-      if (staticTranslation !== translationKey) {
-        setTranslatedContent(staticTranslation);
+      const exactMatch = getExactTranslation(translationKey);
+      if (exactMatch) {
+        setTranslatedContent(exactMatch);
         return;
       }
     }
@@ -65,7 +66,7 @@ const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({
       });
 
     return () => { isMounted = false; };
-  }, [language, value, translationKey, t]);
+  }, [language, value, translationKey, getExactTranslation]);
 
   if (isLoading) {
     return (
