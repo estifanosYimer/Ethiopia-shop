@@ -19,7 +19,7 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     id: 'f1',
     name: 'Royal Habesha Kemis',
-    price: 400,
+    price: 280,
     currency: '€',
     category: Category.CLOTHES,
     description: 'Exquisite handwoven cotton dress with gold-thread Tibeb embroidery.',
@@ -73,17 +73,6 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: 'f6',
-    name: 'Wollo Raya Dress',
-    price: 220,
-    currency: '€',
-    category: Category.CLOTHES,
-    description: 'Distinctive black and gold dress style from the Wollo region.',
-    detailedHistory: 'Unlike the typical white Shemma, the Raya style is bold and colorful, often accessorized with heavy jewelry. It reflects the vibrant culture of Northern Ethiopia.',
-    imageUrl: '/images/fashion/wollo-raya-dress.png',
-    inStock: false,
-  },
-  {
-    id: 'f7',
     name: 'Wollo Raya Dress',
     price: 220,
     currency: '€',
