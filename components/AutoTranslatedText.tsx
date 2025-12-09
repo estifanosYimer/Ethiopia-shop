@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../i18n';
 import { translateText } from '../services/geminiService';
-import { Loader2 } from 'lucide-react';
 
 interface AutoTranslatedTextProps {
   value: string;      // The English fallback text
@@ -9,6 +8,17 @@ interface AutoTranslatedTextProps {
   className?: string;
   as?: 'span' | 'p' | 'h1' | 'h2' | 'h3' | 'div';
 }
+
+// Simple string hash for cache keys
+const simpleHash = (str: string) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+};
 
 const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({ 
   value, 
@@ -19,58 +29,77 @@ const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({
   const { language, getExactTranslation } = useLanguage();
   const [translatedContent, setTranslatedContent] = useState<string>(value);
   const [isLoading, setIsLoading] = useState(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!value) return;
+
     // 1. If language is English, just show the value
     if (language === 'en') {
       setTranslatedContent(value);
+      setIsLoading(false);
       return;
     }
 
     // 2. Try to get it from i18n (Strict Check)
-    // We do NOT use t() because it falls back to English.
-    // We want to detect if the translation is MISSING in the current language.
     if (translationKey) {
       const exactMatch = getExactTranslation(translationKey);
       if (exactMatch) {
         setTranslatedContent(exactMatch);
+        setIsLoading(false);
         return;
       }
     }
 
-    // 3. Check Local Storage Cache (to avoid repeated API calls)
-    const cacheKey = `tr_${language}_${value.substring(0, 16)}_${value.length}`; // Simple hash
+    // 3. Check Local Storage Cache
+    // v2 prefix busts old cache from previous buggy versions
+    const contentHash = simpleHash(value);
+    const cacheKey = `tr_v2_${language}_${contentHash}`; 
     const cached = localStorage.getItem(cacheKey);
+    
     if (cached) {
       setTranslatedContent(cached);
+      setIsLoading(false);
       return;
     }
 
     // 4. AI Translation Needed
-    let isMounted = true;
     setIsLoading(true);
 
     translateText(value, language)
       .then((result) => {
-        if (isMounted) {
-          setTranslatedContent(result);
-          localStorage.setItem(cacheKey, result); // Save to cache
-          setIsLoading(false);
+        if (!mountedRef.current) return;
+
+        // Validation: Only use and cache if result is valid and different from source (unless source was short)
+        // If result is null (error) or strictly equals source when language is not source, assume failure or skip caching
+        if (result && result !== value) {
+            setTranslatedContent(result);
+            localStorage.setItem(cacheKey, result);
+        } else {
+            // API returned null (error) or same string. 
+            // We display the English fallback but DO NOT cache it, so we retry next time.
+            setTranslatedContent(value);
         }
+        setIsLoading(false);
       })
-      .catch(() => {
-        if (isMounted) {
-          setTranslatedContent(value); // Fallback
-          setIsLoading(false);
+      .catch((err) => {
+        console.error("AutoTranslate Component Error:", err);
+        if (mountedRef.current) {
+            setTranslatedContent(value);
+            setIsLoading(false);
         }
       });
 
-    return () => { isMounted = false; };
   }, [language, value, translationKey, getExactTranslation]);
 
   if (isLoading) {
     return (
-        <Component className={`${className} opacity-70 animate-pulse`}>
+        <Component className={`${className} opacity-60 animate-pulse`}>
            {translatedContent} 
         </Component>
     );

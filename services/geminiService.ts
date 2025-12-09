@@ -53,15 +53,18 @@ export const sendMessageToCurator = async (chat: Chat, message: string): Promise
   }
 };
 
-export const translateText = async (text: string, targetLanguageCode: string): Promise<string> => {
+export const translateText = async (text: string, targetLanguageCode: string): Promise<string | null> => {
+  if (!text) return null;
+  
   try {
     const ai = getClient();
     const prompt = `Translate the following text into the language with code "${targetLanguageCode}".
     
     Rules:
-    1. Return ONLY the translated string. No explanations, no quotes.
+    1. Return ONLY the translated string. Do not include "Translation:", quotes, or explanations.
     2. Maintain the tone: Elegant, cultural, sophisticated.
     3. For product names, keep them recognizable but transliterated if necessary.
+    4. If the text is already in the target language or cannot be translated, return the original text.
     
     Text to translate: "${text}"`;
 
@@ -70,9 +73,10 @@ export const translateText = async (text: string, targetLanguageCode: string): P
       contents: prompt,
     });
 
-    return response.text?.trim() || text;
+    const result = response.text?.trim();
+    return result || null;
   } catch (error) {
     console.error("Translation Error:", error);
-    return text; // Fallback to original
+    return null; // Return null to indicate failure so we don't cache the fallback
   }
 };
