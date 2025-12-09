@@ -508,6 +508,7 @@ interface LanguageContextType {
   setLanguage: (lang: LanguageCode) => void;
   t: (key: string) => string;
   getExactTranslation: (key: string) => string | undefined;
+  findBestTranslation: (text: string) => string | undefined;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -535,8 +536,24 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     return undefined;
   };
 
+  const findBestTranslation = (englishText: string): string | undefined => {
+    if (!englishText) return undefined;
+    const cleanText = englishText.trim();
+    
+    // Iterate over English keys to find a match for the content
+    const enEntries = Object.entries(translations['en']);
+    for (const [key, val] of enEntries) {
+        if (val === cleanText || val.trim() === cleanText) {
+            // Check if current language has this key
+            const translated = translations[language]?.[key];
+            if (translated) return translated;
+        }
+    }
+    return undefined;
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, getExactTranslation }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, getExactTranslation, findBestTranslation }}>
       {children}
     </LanguageContext.Provider>
   );

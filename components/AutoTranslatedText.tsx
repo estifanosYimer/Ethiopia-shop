@@ -26,7 +26,7 @@ const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({
   className = '', 
   as: Component = 'span' 
 }) => {
-  const { language, getExactTranslation } = useLanguage();
+  const { language, getExactTranslation, findBestTranslation } = useLanguage();
   const [translatedContent, setTranslatedContent] = useState<string>(value);
   const [isLoading, setIsLoading] = useState(false);
   const mountedRef = useRef(true);
@@ -46,7 +46,7 @@ const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({
       return;
     }
 
-    // 2. Try to get it from i18n (Strict Check)
+    // 2. Try to get it from i18n (Strict Check via Key)
     if (translationKey) {
       const exactMatch = getExactTranslation(translationKey);
       if (exactMatch) {
@@ -56,7 +56,17 @@ const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({
       }
     }
 
-    // 3. Check Local Storage Cache
+    // 3. Translation Memory check (Reverse Lookup)
+    // This looks for ANY existing translation of the exact same English text.
+    // Extremely useful for duplicate products/descriptions.
+    const memoryMatch = findBestTranslation(value);
+    if (memoryMatch) {
+        setTranslatedContent(memoryMatch);
+        setIsLoading(false);
+        return;
+    }
+
+    // 4. Check Local Storage Cache
     // v2 prefix busts old cache from previous buggy versions
     const contentHash = simpleHash(value);
     const cacheKey = `tr_v2_${language}_${contentHash}`; 
@@ -68,7 +78,7 @@ const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({
       return;
     }
 
-    // 4. AI Translation Needed
+    // 5. AI Translation Needed
     setIsLoading(true);
 
     translateText(value, language)
@@ -95,7 +105,7 @@ const AutoTranslatedText: React.FC<AutoTranslatedTextProps> = ({
         }
       });
 
-  }, [language, value, translationKey, getExactTranslation]);
+  }, [language, value, translationKey, getExactTranslation, findBestTranslation]);
 
   if (isLoading) {
     return (
