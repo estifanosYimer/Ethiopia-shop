@@ -57,6 +57,16 @@ const AppContent: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const getCategoryTranslation = (cat: Category) => {
+      switch (cat) {
+          case Category.CLOTHES: return t('nav_clothes');
+          case Category.ART: return t('nav_art');
+          case Category.ACCESSORIES: return t('nav_accessories');
+          case Category.MISC: return t('nav_misc');
+          default: return t('nav_shop'); // For 'All' usually
+      }
+  };
+
   // Computed
   const filteredProducts = useMemo(() => {
     let products = MOCK_PRODUCTS;
@@ -69,15 +79,26 @@ const AppContent: React.FC = () => {
     // Filter by search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      products = products.filter(p => 
-        p.name.toLowerCase().includes(q) || 
-        p.description.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-      );
+      products = products.filter(p => {
+        // Search against translated fields for the current language
+        const translatedName = t(`product_${p.id}_name`).toLowerCase();
+        const translatedDesc = t(`product_${p.id}_desc`).toLowerCase();
+        const translatedCategory = getCategoryTranslation(p.category).toLowerCase();
+        
+        // Also check original English fields to support mixed searching
+        const englishName = p.name.toLowerCase();
+        
+        return (
+            translatedName.includes(q) || 
+            translatedDesc.includes(q) || 
+            translatedCategory.includes(q) ||
+            englishName.includes(q)
+        );
+      });
     }
     
     return products;
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, language]);
 
   // Handlers
   const handleAddToCart = (product: Product) => {
@@ -150,16 +171,6 @@ const AppContent: React.FC = () => {
 
   const openInfoModal = (type: InfoModalType) => {
     setInfoModalType(type);
-  };
-
-  const getCategoryTranslation = (cat: Category) => {
-      switch (cat) {
-          case Category.CLOTHES: return t('nav_clothes');
-          case Category.ART: return t('nav_art');
-          case Category.ACCESSORIES: return t('nav_accessories');
-          case Category.MISC: return t('nav_misc');
-          default: return t('nav_shop'); // For 'All' usually
-      }
   };
 
   // Components (Inline for layout simplicity within file constraints)
