@@ -19,7 +19,7 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     id: 'f1',
     name: 'Royal Habesha Kemis',
-    price: 280,
+    price: 400,
     currency: '€',
     category: Category.CLOTHES,
     description: 'Exquisite handwoven cotton dress with gold-thread Tibeb embroidery.',
