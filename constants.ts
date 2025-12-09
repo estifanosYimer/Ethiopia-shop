@@ -84,7 +84,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: 'f7',
-    name: 'Wollo Raya Dress',
+    name: 'Wollo Raya Dress2',
     price: 220,
     currency: '€',
     category: Category.CLOTHES,
