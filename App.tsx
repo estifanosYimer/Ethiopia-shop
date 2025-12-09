@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight as ArrowRightIcon } from 'lucide-react';
 import { MOCK_PRODUCTS } from './constants';
@@ -12,6 +11,7 @@ import OrdersModal from './components/OrdersModal';
 import Button from './components/Button';
 import ImageWithFallback from './components/ImageWithFallback';
 import { LanguageProvider, useLanguage } from './i18n';
+import AutoTranslatedText from './components/AutoTranslatedText';
 
 const LANGUAGE_OPTIONS: {code: LanguageCode; label: string; flag: string}[] = [
     { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -388,7 +388,7 @@ const AppContent: React.FC = () => {
             <div className="aspect-[4/5] overflow-hidden relative">
                 <ImageWithFallback 
                   src={product.imageUrl} 
-                  alt={t(`product_${product.id}_name`)}
+                  alt={product.name}
                   fallbackTerm={`ethiopian ${product.category} ${product.name}`}
                   className="w-full h-full object-cover" 
                 />
@@ -405,18 +405,34 @@ const AppContent: React.FC = () => {
                 <span className="text-eth-earth font-bold tracking-widest uppercase text-xs">{getCategoryTranslation(product.category)}</span>
             </div>
             
-            <h1 className="text-5xl font-serif font-bold text-stone-900 mb-6 leading-tight">{t(`product_${product.id}_name`)}</h1>
+            <AutoTranslatedText 
+                as="h1"
+                className="text-5xl font-serif font-bold text-stone-900 mb-6 leading-tight"
+                value={product.name}
+                translationKey={`product_${product.id}_name`}
+            />
+
             <p className="text-3xl text-coffee font-serif italic mb-8">{product.currency}{product.price}</p>
             
             <div className="prose prose-stone mb-10">
-                <p className="text-lg leading-relaxed text-stone-700">{t(`product_${product.id}_desc`)}</p>
+                <AutoTranslatedText 
+                    as="p"
+                    className="text-lg leading-relaxed text-stone-700"
+                    value={product.description}
+                    translationKey={`product_${product.id}_desc`}
+                />
                 
                 <div className="bg-white p-6 border-l-4 border-gold-accent my-8 shadow-sm">
                     <h3 className="font-serif text-lg text-stone-900 mb-2 flex items-center gap-2">
                         <Globe size={16} className="text-stone-400" />
                         {t('heritage_craft')}
                     </h3>
-                    <p className="text-stone-600 text-sm leading-relaxed italic">{t(`product_${product.id}_history`)}</p>
+                    <AutoTranslatedText 
+                        as="p"
+                        className="text-stone-600 text-sm leading-relaxed italic"
+                        value={product.detailedHistory}
+                        translationKey={`product_${product.id}_history`}
+                    />
                 </div>
             </div>
 

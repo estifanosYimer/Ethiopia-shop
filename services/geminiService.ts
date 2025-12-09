@@ -52,3 +52,27 @@ export const sendMessageToCurator = async (chat: Chat, message: string): Promise
     return "I am currently unable to respond. Please check your connection.";
   }
 };
+
+export const translateText = async (text: string, targetLanguageCode: string): Promise<string> => {
+  try {
+    const ai = getClient();
+    const prompt = `Translate the following text into the language with code "${targetLanguageCode}".
+    
+    Rules:
+    1. Return ONLY the translated string. No explanations, no quotes.
+    2. Maintain the tone: Elegant, cultural, sophisticated.
+    3. For product names, keep them recognizable but transliterated if necessary.
+    
+    Text to translate: "${text}"`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+
+    return response.text?.trim() || text;
+  } catch (error) {
+    console.error("Translation Error:", error);
+    return text; // Fallback to original
+  }
+};

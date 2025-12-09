@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Product } from '../types';
 import Button from './Button';
 import ImageWithFallback from './ImageWithFallback';
 import { useLanguage } from '../i18n';
+import AutoTranslatedText from './AutoTranslatedText';
 
 interface ProductListProps {
   products: Product[];
@@ -40,7 +40,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, onProductClick, onA
           >
             <ImageWithFallback 
               src={product.imageUrl} 
-              alt={t(`product_${product.id}_name`)} 
+              alt={product.name}
               fallbackTerm={`ethiopian ${product.category} ${product.name}`}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
@@ -59,10 +59,18 @@ const ProductList: React.FC<ProductListProps> = ({ products, onProductClick, onA
                <div className="text-[10px] uppercase tracking-widest text-emerald-800 font-bold mb-1">
                  {getCategoryTranslation(product.category)}
                </div>
-               <h3 className="font-serif text-xl font-bold text-stone-900 group-hover:text-emerald-800 transition-colors">
-                 {t(`product_${product.id}_name`)}
-               </h3>
-               <p className="text-stone-500 text-sm line-clamp-2 mt-2 font-light leading-relaxed">{t(`product_${product.id}_desc`)}</p>
+               <AutoTranslatedText 
+                 as="h3" 
+                 className="font-serif text-xl font-bold text-stone-900 group-hover:text-emerald-800 transition-colors"
+                 value={product.name}
+                 translationKey={`product_${product.id}_name`}
+               />
+               <AutoTranslatedText 
+                 as="p"
+                 className="text-stone-500 text-sm line-clamp-2 mt-2 font-light leading-relaxed"
+                 value={product.description}
+                 translationKey={`product_${product.id}_desc`}
+               />
             </div>
             
             <div className="mt-auto flex items-center justify-between pt-5 border-t border-stone-100">

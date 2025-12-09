@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { X, Minus, Plus, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { CartItem } from '../types';
 import Button from './Button';
 import ImageWithFallback from './ImageWithFallback';
 import { useLanguage } from '../i18n';
+import AutoTranslatedText from './AutoTranslatedText';
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -55,13 +55,18 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
                   <div className="w-20 h-20 bg-stone-100 rounded-md overflow-hidden flex-shrink-0 border border-stone-200">
                     <ImageWithFallback 
                       src={item.imageUrl} 
-                      alt={item.name} 
+                      alt={item.name}
                       fallbackTerm={item.name}
                       className="w-full h-full object-cover" 
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-serif font-medium text-stone-900">{t(`product_${item.id}_name`)}</h3>
+                    <AutoTranslatedText 
+                      as="h3"
+                      className="font-serif font-medium text-stone-900"
+                      value={item.name}
+                      translationKey={`product_${item.id}_name`}
+                    />
                     <p className="text-emerald-800 font-bold text-sm">{item.currency}{item.price}</p>
                     <div className="flex items-center gap-3 mt-2">
                       <button 

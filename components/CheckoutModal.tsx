@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy, Loader2, Mail, Phone, ExternalLink } from 'lucide-react';
 import Button from './Button';
@@ -6,6 +5,7 @@ import { CartItem, ShippingDetails, Order, PaymentMethod, CardProvider } from '.
 import ImageWithFallback from './ImageWithFallback';
 import { saveOrder } from '../services/orderService';
 import { useLanguage } from '../i18n';
+import AutoTranslatedText from './AutoTranslatedText';
 
 // --- MERCHANT BANK DETAILS ---
 const MERCHANT_BANK_DETAILS = {
@@ -147,14 +147,19 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
                 <div className="relative w-16 h-16 rounded bg-white border border-stone-200 overflow-hidden flex-shrink-0">
                   <ImageWithFallback 
                     src={item.imageUrl} 
-                    alt={t(`product_${item.id}_name`)} 
+                    alt={item.name}
                     fallbackTerm={item.name}
                     className="w-full h-full object-cover" 
                   />
                   <span className="absolute top-0 right-0 bg-stone-600 text-white text-[10px] px-1.5 py-0.5 rounded-bl">{item.quantity}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-stone-900 truncate">{t(`product_${item.id}_name`)}</p>
+                  <AutoTranslatedText 
+                    as="p"
+                    className="font-medium text-sm text-stone-900 truncate"
+                    value={item.name}
+                    translationKey={`product_${item.id}_name`}
+                  />
                   <p className="text-stone-500 text-sm">€{(item.price * item.quantity).toFixed(2)}</p>
                 </div>
               </div>
