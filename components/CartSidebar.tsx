@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { X, Minus, Plus, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { CartItem } from '../types';
 import Button from './Button';
 import ImageWithFallback from './ImageWithFallback';
+import { useLanguage } from '../i18n';
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -14,6 +16,7 @@ interface CartSidebarProps {
 }
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpdateQuantity, onRemove, onCheckout }) => {
+  const { t } = useLanguage();
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   return (
@@ -30,7 +33,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
           <div className="p-6 border-b border-stone-200 flex justify-between items-center bg-white">
             <h2 className="text-xl font-serif font-bold text-stone-900 flex items-center gap-2">
               <ShoppingBag size={20} className="text-emerald-800" />
-              Your Collection
+              {t('cart_title')}
             </h2>
             <button onClick={onClose} className="text-stone-500 hover:text-stone-800 transition-colors">
               <X size={24} />
@@ -58,7 +61,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-serif font-medium text-stone-900">{item.name}</h3>
+                    <h3 className="font-serif font-medium text-stone-900">{t(`product_${item.id}_name`)}</h3>
                     <p className="text-emerald-800 font-bold text-sm">{item.currency}{item.price}</p>
                     <div className="flex items-center gap-3 mt-2">
                       <button 
@@ -95,10 +98,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
             </div>
             <div className="flex items-center gap-2 text-xs text-stone-500 mb-6 bg-stone-50 p-2 rounded">
                 <ShieldCheck size={14} className="text-emerald-700" />
-                <span>Secure SSL Encrypted Checkout</span>
+                <span>{t('secure_ssl')}</span>
             </div>
             <Button className="w-full bg-stone-900 hover:bg-stone-800" disabled={items.length === 0} onClick={onCheckout}>
-              Proceed to Secure Checkout
+              {t('checkout_btn')}
             </Button>
           </div>
         </div>

@@ -1,7 +1,8 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight as ArrowRightIcon } from 'lucide-react';
 import { MOCK_PRODUCTS } from './constants';
-import { Product, CartItem, Category } from './types';
+import { Product, CartItem, Category, LanguageCode } from './types';
 import ProductList from './components/ProductList';
 import CartSidebar from './components/CartSidebar';
 import CuratorChat from './components/CuratorChat';
@@ -10,8 +11,22 @@ import InfoModal, { InfoModalType } from './components/InfoModal';
 import OrdersModal from './components/OrdersModal';
 import Button from './components/Button';
 import ImageWithFallback from './components/ImageWithFallback';
+import { LanguageProvider, useLanguage } from './i18n';
 
-const App: React.FC = () => {
+const LANGUAGE_OPTIONS: {code: LanguageCode; label: string; flag: string}[] = [
+    { code: 'en', label: 'English', flag: '🇬🇧' },
+    { code: 'am', label: 'አማርኛ', flag: '🇪🇹' },
+    { code: 'om', label: 'Afaan Oromoo', flag: '🌳' }, 
+    { code: 'ti', label: 'ትግርኛ', flag: '⛰️' }, 
+    { code: 'fr', label: 'Français', flag: '🇫🇷' },
+    { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+    { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
+    { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+];
+
+const AppContent: React.FC = () => {
+  const { t, language, setLanguage } = useLanguage();
+
   // State
   const [currentView, setCurrentView] = useState<'home' | 'shop' | 'product'>('home');
   const [selectedCategory, setSelectedCategory] = useState<Category>(Category.ALL);
@@ -22,6 +37,7 @@ const App: React.FC = () => {
   const [infoModalType, setInfoModalType] = useState<InfoModalType>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   
   // Search State
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -46,7 +62,6 @@ const App: React.FC = () => {
     let products = MOCK_PRODUCTS;
 
     // Filter by category if not All AND not searching (search usually overrides category, or we can combine)
-    // Let's allow searching within a category if a category is specifically selected, otherwise search all.
     if (selectedCategory !== Category.ALL) {
       products = products.filter(p => p.category === selectedCategory);
     }
@@ -137,6 +152,16 @@ const App: React.FC = () => {
     setInfoModalType(type);
   };
 
+  const getCategoryTranslation = (cat: Category) => {
+      switch (cat) {
+          case Category.CLOTHES: return t('nav_clothes');
+          case Category.ART: return t('nav_art');
+          case Category.ACCESSORIES: return t('nav_accessories');
+          case Category.MISC: return t('nav_misc');
+          default: return t('nav_shop'); // For 'All' usually
+      }
+  };
+
   // Components (Inline for layout simplicity within file constraints)
   
   const Header = () => (
@@ -154,18 +179,18 @@ const App: React.FC = () => {
 
           {/* Desktop Nav */}
           {!isSearchActive ? (
-            <nav className="hidden md:flex gap-8">
-              <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-widest hover:text-eth-earth transition-colors ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-eth-earth border-b-2 border-eth-earth' : 'text-stone-600'}`}>Shop All</button>
-              <button onClick={() => navigateToShop(Category.CLOTHES)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Clothes</button>
-              <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Art</button>
-              <button onClick={() => navigateToShop(Category.ACCESSORIES)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Accessories</button>
-              <button onClick={() => navigateToShop(Category.MISC)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">Miscellaneous</button>
+            <nav className="hidden md:flex gap-6 lg:gap-8">
+              <button onClick={() => navigateToShop(Category.ALL)} className={`text-sm font-medium uppercase tracking-widest hover:text-eth-earth transition-colors ${currentView === 'shop' && selectedCategory === Category.ALL ? 'text-eth-earth border-b-2 border-eth-earth' : 'text-stone-600'}`}>{t('nav_shop')}</button>
+              <button onClick={() => navigateToShop(Category.CLOTHES)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">{t('nav_clothes')}</button>
+              <button onClick={() => navigateToShop(Category.ART)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">{t('nav_art')}</button>
+              <button onClick={() => navigateToShop(Category.ACCESSORIES)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">{t('nav_accessories')}</button>
+              <button onClick={() => navigateToShop(Category.MISC)} className="text-sm font-medium uppercase tracking-widest text-stone-600 hover:text-eth-earth transition-colors">{t('nav_misc')}</button>
             </nav>
           ) : (
             <div className="hidden md:flex flex-1 max-w-lg mx-8 animate-fade-in relative">
               <input 
                 type="text" 
-                placeholder="Search collection..." 
+                placeholder={t('search_placeholder')}
                 autoFocus
                 className="w-full bg-stone-50 border-b-2 border-emerald-900 px-4 py-2 text-stone-900 focus:outline-none placeholder:text-stone-400 font-serif"
                 value={searchQuery}
@@ -177,8 +202,32 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {/* Icons */}
-          <div className="flex items-center gap-5">
+          {/* Icons & Language */}
+          <div className="flex items-center gap-3 sm:gap-5">
+            {/* Language Selector Desktop */}
+            <div className="relative hidden md:block">
+                <button 
+                  onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                  className="flex items-center gap-1 text-stone-600 hover:text-emerald-900 font-bold uppercase text-xs"
+                >
+                    <Globe size={18} />
+                    <span>{language.toUpperCase()}</span>
+                </button>
+                {isLangMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-32 bg-white rounded shadow-xl border border-stone-100 py-1 z-50">
+                        {LANGUAGE_OPTIONS.map(opt => (
+                            <button
+                                key={opt.code}
+                                onClick={() => { setLanguage(opt.code); setIsLangMenuOpen(false); }}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-emerald-50 flex items-center gap-2 ${language === opt.code ? 'font-bold text-emerald-900' : 'text-stone-600'}`}
+                            >
+                                <span className="text-base">{opt.flag}</span> {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             <button 
               className={`hover:text-stone-900 hidden sm:block transition-colors ${isSearchActive ? 'text-emerald-900' : 'text-stone-600'}`}
               onClick={toggleSearch}
@@ -210,22 +259,38 @@ const App: React.FC = () => {
       
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-parchment border-b border-stone-200 py-4 px-4 space-y-4 shadow-lg">
+        <div className="md:hidden bg-parchment border-b border-stone-200 py-4 px-4 space-y-4 shadow-lg max-h-[80vh] overflow-y-auto">
            <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
               <input 
                 type="text" 
-                placeholder="Search..." 
+                placeholder={t('search_placeholder')}
                 className="w-full bg-white border border-stone-200 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-900"
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
            </div>
-           <button onClick={() => {navigateToShop(Category.ALL); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Shop All</button>
-           <button onClick={() => {navigateToShop(Category.CLOTHES); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Clothes</button>
-           <button onClick={() => {navigateToShop(Category.ART); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Art</button>
-           <button onClick={() => {navigateToShop(Category.ACCESSORIES); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">Accessories</button>
-           <button onClick={() => {navigateToShop(Category.MISC); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800">Miscellaneous</button>
+           <button onClick={() => {navigateToShop(Category.ALL); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">{t('nav_shop')}</button>
+           <button onClick={() => {navigateToShop(Category.CLOTHES); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">{t('nav_clothes')}</button>
+           <button onClick={() => {navigateToShop(Category.ART); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">{t('nav_art')}</button>
+           <button onClick={() => {navigateToShop(Category.ACCESSORIES); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">{t('nav_accessories')}</button>
+           <button onClick={() => {navigateToShop(Category.MISC); setIsMobileMenuOpen(false)}} className="block w-full text-left py-2 font-serif font-medium text-stone-800 border-b border-stone-200">{t('nav_misc')}</button>
+           
+           {/* Mobile Language Selector */}
+           <div className="pt-2">
+             <h4 className="text-xs uppercase text-stone-400 font-bold mb-2">Language</h4>
+             <div className="grid grid-cols-2 gap-2">
+                {LANGUAGE_OPTIONS.map(opt => (
+                    <button
+                        key={opt.code}
+                        onClick={() => { setLanguage(opt.code); setIsMobileMenuOpen(false); }}
+                        className={`text-left px-3 py-2 rounded text-sm flex items-center gap-2 border ${language === opt.code ? 'bg-emerald-50 border-emerald-900 text-emerald-900' : 'bg-white border-stone-200 text-stone-600'}`}
+                    >
+                        <span>{opt.flag}</span> {opt.label}
+                    </button>
+                ))}
+             </div>
+           </div>
         </div>
       )}
     </header>
@@ -236,16 +301,16 @@ const App: React.FC = () => {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center items-center">
         <div className="max-w-4xl animate-fade-in flex flex-col items-center">
             <div className="mb-6">
-                <h2 className="text-gold-accent font-medium tracking-[0.3em] uppercase text-sm mb-4">Direct from Addis Ababa to Europe</h2>
+                <h2 className="text-gold-accent font-medium tracking-[0.3em] uppercase text-sm mb-4">{t('hero_subtitle')}</h2>
             </div>
             <h1 className="text-5xl sm:text-7xl md:text-8xl font-serif font-bold mb-8 leading-tight">
-            Timeless Ethiopian<br/> Craftsmanship
+            {t('hero_title')}
             </h1>
             <p className="text-xl text-stone-200 max-w-2xl mb-12 font-light leading-relaxed">
-            Explore a curated collection of handwoven Tibeb, ancient manuscripts, and artisan home decor. Verified authentic, delivered to your doorstep.
+            {t('hero_desc')}
             </p>
             <div className="flex gap-6">
-            <Button size="lg" onClick={() => navigateToShop()} className="bg-gold-accent text-stone-900 hover:bg-white border-none font-bold px-8">Explore Collection</Button>
+            <Button size="lg" onClick={() => navigateToShop()} className="bg-gold-accent text-stone-900 hover:bg-white border-none font-bold px-8">{t('hero_btn')}</Button>
             </div>
         </div>
       </div>
@@ -256,15 +321,15 @@ const App: React.FC = () => {
     <div className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <span className="text-eth-earth uppercase tracking-widest text-xs font-bold mb-2 block">Discover</span>
-          <h2 className="text-4xl font-serif font-bold text-stone-900 mb-6">Curated Collections</h2>
+          <span className="text-eth-earth uppercase tracking-widest text-xs font-bold mb-2 block">{t('discover_label')}</span>
+          <h2 className="text-4xl font-serif font-bold text-stone-900 mb-6">{t('curated_collections')}</h2>
           <div className="w-24 h-px bg-eth-earth mx-auto"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { icon: Shirt, label: 'Clothes', cat: Category.CLOTHES, desc: 'Handwoven Tibeb & Modern Cuts', image: '/images/banners/fashion.png' },
-            { icon: Palette, label: 'Fine Art & Icons', cat: Category.ART, desc: 'Coptic Art & Contemporary Canvas', image: '/images/banners/art.png' },
-            { icon: Coffee, label: 'Miscellaneous', cat: Category.MISC, desc: 'Coffee, Spices & Home Decor', image: '/images/banners/coffee.png' },
+            { icon: Shirt, label: t('nav_clothes'), cat: Category.CLOTHES, desc: t('cat_clothes_desc'), image: '/images/banners/fashion.png' },
+            { icon: Palette, label: t('nav_art'), cat: Category.ART, desc: t('cat_art_desc'), image: '/images/banners/art.png' },
+            { icon: Coffee, label: t('nav_misc'), cat: Category.MISC, desc: t('cat_misc_desc'), image: '/images/banners/coffee.png' },
           ].map((item, idx) => (
             <div 
               key={idx} 
@@ -286,7 +351,7 @@ const App: React.FC = () => {
                   <h3 className="text-2xl font-serif font-bold text-white mb-2">{item.label}</h3>
                   <p className="text-stone-300 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">{item.desc}</p>
                   <div className="flex items-center text-gold-accent font-medium text-sm tracking-wide uppercase">
-                    Shop Now <ChevronRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform" />
+                    {t('shop_now')} <ChevronRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform" />
                   </div>
               </div>
             </div>
@@ -303,7 +368,7 @@ const App: React.FC = () => {
             onClick={() => setCurrentView('shop')}
             className="flex items-center text-stone-500 hover:text-stone-900 mb-8 transition-colors group"
         >
-            <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Shop
+            <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" /> {t('back_to_shop')}
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -312,12 +377,12 @@ const App: React.FC = () => {
             <div className="aspect-[4/5] overflow-hidden relative">
                 <ImageWithFallback 
                   src={product.imageUrl} 
-                  alt={product.name} 
+                  alt={t(`product_${product.id}_name`)}
                   fallbackTerm={`ethiopian ${product.category} ${product.name}`}
                   className="w-full h-full object-cover" 
                 />
                 <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-4 py-2 text-xs font-mono uppercase tracking-widest text-stone-800">
-                    Authentic
+                    {t('authentic')}
                 </div>
             </div>
             </div>
@@ -326,27 +391,27 @@ const App: React.FC = () => {
             <div className="flex flex-col justify-center pt-8">
             <div className="flex items-center gap-2 mb-4">
                 <span className="h-px w-8 bg-eth-earth"></span>
-                <span className="text-eth-earth font-bold tracking-widest uppercase text-xs">{product.category}</span>
+                <span className="text-eth-earth font-bold tracking-widest uppercase text-xs">{getCategoryTranslation(product.category)}</span>
             </div>
             
-            <h1 className="text-5xl font-serif font-bold text-stone-900 mb-6 leading-tight">{product.name}</h1>
+            <h1 className="text-5xl font-serif font-bold text-stone-900 mb-6 leading-tight">{t(`product_${product.id}_name`)}</h1>
             <p className="text-3xl text-coffee font-serif italic mb-8">{product.currency}{product.price}</p>
             
             <div className="prose prose-stone mb-10">
-                <p className="text-lg leading-relaxed text-stone-700">{product.description}</p>
+                <p className="text-lg leading-relaxed text-stone-700">{t(`product_${product.id}_desc`)}</p>
                 
                 <div className="bg-white p-6 border-l-4 border-gold-accent my-8 shadow-sm">
                     <h3 className="font-serif text-lg text-stone-900 mb-2 flex items-center gap-2">
                         <Globe size={16} className="text-stone-400" />
-                        Heritage & Craft
+                        {t('heritage_craft')}
                     </h3>
-                    <p className="text-stone-600 text-sm leading-relaxed italic">{product.detailedHistory}</p>
+                    <p className="text-stone-600 text-sm leading-relaxed italic">{t(`product_${product.id}_history`)}</p>
                 </div>
             </div>
 
             <div className="flex gap-4 mb-10">
                 <Button size="lg" className="flex-1 h-14 bg-eth-earth text-lg" onClick={() => handleAddToCart(product)} disabled={!product.inStock}>
-                {product.inStock ? 'Add to Collection' : 'Out of Stock'}
+                {product.inStock ? t('add_to_collection') : t('out_of_stock')}
                 </Button>
             </div>
 
@@ -354,15 +419,15 @@ const App: React.FC = () => {
                 <div className="flex items-start gap-3">
                 <div className="p-2 bg-emerald-50 rounded-full text-emerald-900"><Globe size={20} /></div>
                 <div>
-                    <h4 className="font-bold text-stone-900 text-sm">Global Shipping</h4>
-                    <p className="text-xs text-stone-600 mt-1">Direct from Addis Ababa via Ethiopian Airlines.</p>
+                    <h4 className="font-bold text-stone-900 text-sm">{t('global_shipping')}</h4>
+                    <p className="text-xs text-stone-600 mt-1">{t('global_shipping_desc')}</p>
                 </div>
                 </div>
                 <div className="flex items-start gap-3">
                 <div className="p-2 bg-emerald-50 rounded-full text-emerald-900"><Palette size={20} /></div>
                 <div>
-                    <h4 className="font-bold text-stone-900 text-sm">Artisan Crafted</h4>
-                    <p className="text-xs text-stone-600 mt-1">Handmade by master craftsmen in Ethiopia.</p>
+                    <h4 className="font-bold text-stone-900 text-sm">{t('artisan_crafted')}</h4>
+                    <p className="text-xs text-stone-600 mt-1">{t('artisan_crafted_desc')}</p>
                 </div>
                 </div>
             </div>
@@ -385,11 +450,11 @@ const App: React.FC = () => {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                  <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
                     <div>
-                        <h2 className="text-3xl font-serif font-bold text-stone-900">Featured Arrivals</h2>
-                        <p className="text-stone-500 mt-2">New treasures from the highlands.</p>
+                        <h2 className="text-3xl font-serif font-bold text-stone-900">{t('featured_arrivals')}</h2>
+                        <p className="text-stone-500 mt-2">{t('featured_arrivals_sub')}</p>
                     </div>
                     <button onClick={() => navigateToShop()} className="text-eth-earth font-bold hover:text-emerald-900 flex items-center gap-2 transition-colors">
-                        View All Collection <ArrowRightIcon size={16} />
+                        {t('view_all_collection')} <ArrowRightIcon size={16} />
                     </button>
                  </div>
                  <ProductList 
@@ -407,20 +472,20 @@ const App: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
               <div>
                 <h1 className="text-4xl font-serif font-bold mb-2">
-                    {searchQuery ? `Search results for "${searchQuery}"` : (selectedCategory === Category.ALL ? 'Full Collection' : selectedCategory)}
+                    {searchQuery ? `${t('search_results')} "${searchQuery}"` : (selectedCategory === Category.ALL ? t('full_collection') : getCategoryTranslation(selectedCategory))}
                 </h1>
-                <p className="text-stone-500">{filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'} found.</p>
+                <p className="text-stone-500">{filteredProducts.length} {filteredProducts.length === 1 ? 'item' : t('items_found')}.</p>
               </div>
               
               {!searchQuery && (
                 <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
-                  {Object.values(Category).map(cat => (
+                  {[Category.ALL, Category.CLOTHES, Category.ART, Category.ACCESSORIES, Category.MISC].map(cat => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
                       className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${selectedCategory === cat ? 'bg-eth-earth text-white shadow-lg transform scale-105' : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:border-emerald-200'}`}
                     >
-                      {cat}
+                      {cat === Category.ALL ? t('nav_shop') : getCategoryTranslation(cat)}
                     </button>
                   ))}
                 </div>
@@ -436,13 +501,13 @@ const App: React.FC = () => {
             ) : (
                 <div className="text-center py-20 bg-white border border-stone-100 rounded-lg">
                     <Search className="mx-auto h-12 w-12 text-stone-300 mb-4" />
-                    <h3 className="text-lg font-medium text-stone-900">No items found</h3>
+                    <h3 className="text-lg font-medium text-stone-900">{t('no_items_found')}</h3>
                     <p className="text-stone-500 mt-2">Try adjusting your search terms or browse our full collection.</p>
                     <Button 
                         className="mt-6" 
                         onClick={() => {setSearchQuery(''); setIsSearchActive(false); setSelectedCategory(Category.ALL)}}
                     >
-                        Reset Search
+                        {t('reset_search')}
                     </Button>
                 </div>
             )}
@@ -465,16 +530,16 @@ const App: React.FC = () => {
              </div>
           </div>
           <div>
-            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-gold-accent">Customer Care</h3>
+            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-gold-accent">{t('customer_care')}</h3>
             <ul className="space-y-3 text-sm">
-              <li onClick={() => openInfoModal('shipping')} className="hover:text-white cursor-pointer transition-colors">Shipping Policy (EU)</li>
-              <li onClick={() => openInfoModal('authenticity')} className="hover:text-white cursor-pointer transition-colors">Authenticity Guarantee</li>
-              <li onClick={() => openInfoModal('returns')} className="hover:text-white cursor-pointer transition-colors">Returns & Exchanges</li>
-              <li onClick={() => openInfoModal('tracking')} className="hover:text-white cursor-pointer transition-colors font-bold text-gold-accent">Track Your Order</li>
+              <li onClick={() => openInfoModal('shipping')} className="hover:text-white cursor-pointer transition-colors">{t('shipping_policy')}</li>
+              <li onClick={() => openInfoModal('authenticity')} className="hover:text-white cursor-pointer transition-colors">{t('authenticity_guarantee')}</li>
+              <li onClick={() => openInfoModal('returns')} className="hover:text-white cursor-pointer transition-colors">{t('returns_exchanges')}</li>
+              <li onClick={() => openInfoModal('tracking')} className="hover:text-white cursor-pointer transition-colors font-bold text-gold-accent">{t('track_order')}</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-gold-accent">Contact</h3>
+            <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-widest text-gold-accent">{t('contact')}</h3>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-eth-earth flex-shrink-0"></span> 
@@ -492,10 +557,10 @@ const App: React.FC = () => {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-stone-800 text-xs text-center flex justify-between items-center text-stone-500">
-          <p>© 2024 Abyssinia Direct. All Rights Reserved.</p>
+          <p>© 2024 Abyssinia Direct. {t('rights_reserved')}</p>
           <div className="flex gap-4 items-center">
-              <span>Privacy Policy</span>
-              <span>Terms of Service</span>
+              <span>{t('privacy_policy')}</span>
+              <span>{t('terms_service')}</span>
               {/* Hidden Admin Trigger - Accessible via Ctrl+Shift+A */}
           </div>
         </div>
@@ -532,5 +597,13 @@ const App: React.FC = () => {
     </div>
   );
 };
+
+const App: React.FC = () => {
+    return (
+        <LanguageProvider>
+            <AppContent />
+        </LanguageProvider>
+    );
+}
 
 export default App;

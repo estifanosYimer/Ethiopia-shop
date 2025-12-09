@@ -1,3 +1,4 @@
+
 export enum Category {
   ALL = 'All',
   CLOTHES = 'Clothes',
@@ -39,6 +40,9 @@ export interface ShippingDetails {
   country: string;
 }
 
+export type PaymentMethod = 'credit_card' | 'paypal' | 'bank_transfer';
+export type CardProvider = 'visa' | 'mastercard' | 'amex' | null;
+
 export interface Order {
   id: string;
   date: string;
@@ -48,6 +52,10 @@ export interface Order {
   duties: number;
   total: number;
   shippingDetails: ShippingDetails;
-  paymentMethod: 'card' | 'bank_transfer';
+  paymentMethod: PaymentMethod;
+  cardProvider?: CardProvider; // Optional, only for cards
+  language: string; // To know which language the user ordered in
   status: 'pending' | 'shipped';
 }
+
+export type LanguageCode = 'en' | 'am' | 'om' | 'ti' | 'fr' | 'nl' | 'it' | 'de';

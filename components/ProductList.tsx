@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Product } from '../types';
 import Button from './Button';
 import ImageWithFallback from './ImageWithFallback';
+import { useLanguage } from '../i18n';
 
 interface ProductListProps {
   products: Product[];
@@ -10,6 +12,18 @@ interface ProductListProps {
 }
 
 const ProductList: React.FC<ProductListProps> = ({ products, onProductClick, onAddToCart }) => {
+  const { t } = useLanguage();
+
+  const getCategoryTranslation = (category: string) => {
+    // Basic mapping based on enum convention or string value
+    if (category === 'Clothes') return t('nav_clothes');
+    if (category === 'Art') return t('nav_art');
+    if (category === 'Accessories') return t('nav_accessories');
+    if (category.includes('Misc')) return t('nav_misc');
+    // Fallback for direct matches if keys exist
+    return t(`nav_${category.toLowerCase().replace(' ', '_')}`) || category;
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {products.map((product) => (
@@ -26,27 +40,29 @@ const ProductList: React.FC<ProductListProps> = ({ products, onProductClick, onA
           >
             <ImageWithFallback 
               src={product.imageUrl} 
-              alt={product.name} 
+              alt={t(`product_${product.id}_name`)} 
               fallbackTerm={`ethiopian ${product.category} ${product.name}`}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
             {!product.inStock && (
               <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                <span className="bg-stone-900 text-white px-4 py-2 text-sm font-medium uppercase tracking-widest border border-stone-900">Sold Out</span>
+                <span className="bg-stone-900 text-white px-4 py-2 text-sm font-medium uppercase tracking-widest border border-stone-900">{t('sold_out')}</span>
               </div>
             )}
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-stone-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-               <span className="text-white text-xs font-bold uppercase tracking-widest border-b border-eth-yellow pb-1">View Details</span>
+               <span className="text-white text-xs font-bold uppercase tracking-widest border-b border-eth-yellow pb-1">{t('view_details')}</span>
             </div>
           </div>
           
           <div className="p-6 flex-1 flex flex-col">
             <div onClick={() => onProductClick(product)} className="cursor-pointer mb-3">
-               <div className="text-[10px] uppercase tracking-widest text-emerald-800 font-bold mb-1">{product.category}</div>
+               <div className="text-[10px] uppercase tracking-widest text-emerald-800 font-bold mb-1">
+                 {getCategoryTranslation(product.category)}
+               </div>
                <h3 className="font-serif text-xl font-bold text-stone-900 group-hover:text-emerald-800 transition-colors">
-                 {product.name}
+                 {t(`product_${product.id}_name`)}
                </h3>
-               <p className="text-stone-500 text-sm line-clamp-2 mt-2 font-light leading-relaxed">{product.description}</p>
+               <p className="text-stone-500 text-sm line-clamp-2 mt-2 font-light leading-relaxed">{t(`product_${product.id}_desc`)}</p>
             </div>
             
             <div className="mt-auto flex items-center justify-between pt-5 border-t border-stone-100">
@@ -58,7 +74,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, onProductClick, onA
                 disabled={!product.inStock}
                 className="hover:bg-emerald-900 hover:text-white hover:border-emerald-900 transition-colors"
               >
-                Add to Cart
+                {t('add_to_cart')}
               </Button>
             </div>
           </div>

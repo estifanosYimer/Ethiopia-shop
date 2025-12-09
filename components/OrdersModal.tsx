@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { X, RefreshCw, Archive, MapPin, CreditCard, ShoppingBag, Package, Lock, Mail, Phone } from 'lucide-react';
+import { X, RefreshCw, Archive, MapPin, CreditCard, ShoppingBag, Package, Lock, Mail, Phone, Globe } from 'lucide-react';
 import { getOrders, clearOrders } from '../services/orderService';
 import { Order } from '../types';
 import Button from './Button';
@@ -56,6 +57,23 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
       } else {
           setAuthError(true);
           setPin('');
+      }
+  };
+
+  const getPaymentLabel = (order: Order) => {
+      if (order.paymentMethod === 'credit_card') {
+          return `${order.cardProvider?.toUpperCase() || 'CARD'} ****`;
+      }
+      if (order.paymentMethod === 'paypal') return 'PayPal';
+      return 'Bank Transfer';
+  };
+
+  const getPaymentColor = (method: string) => {
+      switch(method) {
+          case 'credit_card': return 'bg-blue-50 text-blue-700';
+          case 'paypal': return 'bg-sky-50 text-sky-700';
+          case 'bank_transfer': return 'bg-purple-50 text-purple-700';
+          default: return 'bg-stone-100 text-stone-600';
       }
   };
 
@@ -144,8 +162,13 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
                                         <p className="text-xs text-stone-500">{new Date(order.date).toLocaleString()}</p>
                                     </div>
                                     <div className="hidden sm:block">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.paymentMethod === 'card' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`}>
-                                            {order.paymentMethod === 'card' ? 'Credit Card' : 'Bank Transfer'}
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentColor(order.paymentMethod)}`}>
+                                            {getPaymentLabel(order)}
+                                        </span>
+                                    </div>
+                                    <div className="hidden sm:block">
+                                        <span className="flex items-center gap-1 text-xs text-stone-400 border border-stone-200 px-2 py-1 rounded">
+                                            <Globe size={10} /> {order.language?.toUpperCase() || 'EN'}
                                         </span>
                                     </div>
                                 </div>
@@ -191,6 +214,9 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
                                             <div className="pt-2 flex justify-between font-bold text-stone-900">
                                                 <span>Total Paid</span>
                                                 <span>€{order.total.toFixed(2)}</span>
+                                            </div>
+                                            <div className="pt-2 text-xs text-stone-400 text-right">
+                                                Paid via {order.paymentMethod === 'credit_card' ? order.cardProvider : order.paymentMethod}
                                             </div>
                                         </div>
                                     </div>

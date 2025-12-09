@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
 import { X, Truck, ShieldCheck, RefreshCw, Search } from 'lucide-react';
 import Button from './Button';
+import { useLanguage } from '../i18n';
 
 export type InfoModalType = 'shipping' | 'authenticity' | 'returns' | 'tracking' | null;
 
@@ -11,6 +13,7 @@ interface InfoModalProps {
 }
 
 const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, type }) => {
+  const { t } = useLanguage();
   const [trackingId, setTrackingId] = useState('');
   const [trackingResult, setTrackingResult] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(false);
@@ -43,19 +46,19 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, type }) => {
           <>
             <div className="flex items-center gap-3 mb-6 text-emerald-900 border-b border-stone-200 pb-4">
                <Truck size={28} />
-               <h2 className="text-2xl font-serif font-bold">Shipping Policy (EU)</h2>
+               <h2 className="text-2xl font-serif font-bold">{t('shipping_policy')}</h2>
             </div>
             <div className="prose prose-stone text-sm leading-relaxed text-stone-600">
-               <p className="mb-4">We partner exclusively with <strong>Ethiopian Airlines Cargo</strong> to ensure swift and secure delivery from Addis Ababa Bole International Airport directly to major European hubs (Frankfurt, Brussels, Paris, London).</p>
+               <p className="mb-4">{t('policy_shipping_intro')}</p>
                
-               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">Delivery Times</h3>
+               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">{t('policy_shipping_times_title')}</h3>
                <ul className="list-disc pl-5 space-y-2 mb-4">
-                 <li><strong>Express Air:</strong> 3-5 business days.</li>
-                 <li><strong>Standard:</strong> 7-10 business days.</li>
+                 <li>{t('policy_shipping_express')}</li>
+                 <li>{t('policy_shipping_standard')}</li>
                </ul>
 
-               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">Customs & Duties</h3>
-               <p>For customers within the European Union, we offer a DDP (Delivered Duty Paid) service. All import VAT and duties are calculated at checkout, so you won't face surprise fees upon delivery.</p>
+               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">{t('policy_shipping_customs_title')}</h3>
+               <p>{t('policy_shipping_customs')}</p>
             </div>
           </>
         );
@@ -64,16 +67,16 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, type }) => {
           <>
             <div className="flex items-center gap-3 mb-6 text-emerald-900 border-b border-stone-200 pb-4">
                <ShieldCheck size={28} />
-               <h2 className="text-2xl font-serif font-bold">Authenticity Guarantee</h2>
+               <h2 className="text-2xl font-serif font-bold">{t('authenticity_guarantee')}</h2>
             </div>
              <div className="prose prose-stone text-sm leading-relaxed text-stone-600">
-               <p className="mb-4">Every item on Abyssinia Direct is verified by our on-ground curators in Addis Ababa. We take pride in preserving our heritage.</p>
+               <p className="mb-4">{t('policy_auth_intro')}</p>
                
-               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">Our Promise</h3>
+               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">{t('policy_auth_promise_title')}</h3>
                <ul className="list-disc pl-5 space-y-2 mb-4">
-                 <li><strong>Handmade:</strong> We visit the weavers in Dorze and the potters in Jimma personally.</li>
-                 <li><strong>Materials:</strong> We guarantee the use of genuine materials (100% cotton Shemma, pure silver, organic leather).</li>
-                 <li><strong>Provenance:</strong> Antique items come with a Certificate of Origin approved by the Ethiopian Ministry of Tourism & Antiquities.</li>
+                 <li>{t('policy_auth_handmade')}</li>
+                 <li>{t('policy_auth_materials')}</li>
+                 <li>{t('policy_auth_provenance')}</li>
                </ul>
             </div>
           </>
@@ -83,20 +86,20 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, type }) => {
           <>
             <div className="flex items-center gap-3 mb-6 text-emerald-900 border-b border-stone-200 pb-4">
                <RefreshCw size={28} />
-               <h2 className="text-2xl font-serif font-bold">Returns & Exchanges</h2>
+               <h2 className="text-2xl font-serif font-bold">{t('returns_exchanges')}</h2>
             </div>
              <div className="prose prose-stone text-sm leading-relaxed text-stone-600">
-               <p className="mb-4">We adhere to strict EU consumer protection laws to ensure your peace of mind.</p>
+               <p className="mb-4">{t('policy_return_intro')}</p>
                
-               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">Policy</h3>
+               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">{t('policy_return_policy_title')}</h3>
                <ul className="list-disc pl-5 space-y-2 mb-4">
-                 <li>You have <strong>14 days</strong> from receiving your item to request a return.</li>
-                 <li>Items must be unused and in original packaging.</li>
-                 <li>Due to hygiene reasons, earrings and certain textiles cannot be returned if the seal is broken.</li>
+                 <li>{t('policy_return_14days')}</li>
+                 <li>{t('policy_return_unused')}</li>
+                 <li>{t('policy_return_hygiene')}</li>
                </ul>
 
-               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">Process</h3>
-               <p>To initiate a return, contact our support team. You will be provided with a return address in Brussels, Belgium (so you do not need to ship back to Ethiopia).</p>
+               <h3 className="font-bold text-stone-900 text-base mt-4 mb-2">{t('policy_return_process_title')}</h3>
+               <p>{t('policy_return_process')}</p>
             </div>
           </>
         );
@@ -105,7 +108,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, type }) => {
           <>
             <div className="flex items-center gap-3 mb-6 text-emerald-900 border-b border-stone-200 pb-4">
                <Search size={28} />
-               <h2 className="text-2xl font-serif font-bold">Track Your Order</h2>
+               <h2 className="text-2xl font-serif font-bold">{t('track_order')}</h2>
             </div>
              <div className="bg-stone-50 p-6 rounded-lg border border-stone-200">
                <form onSubmit={handleTrack} className="flex gap-2 mb-4">
