@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 import { Product } from '../types';
 
@@ -13,8 +14,8 @@ export const createCuratorChat = (contextProduct?: Product): Chat => {
   const ai = getClient();
   
   let systemInstruction = `
-    You are "Ato Kassa", a knowledgeable and sophisticated curator for "Abyssinia Direct". 
-    Your goal is to bridge the cultural gap between Ethiopia and Europe.
+    You are "Ato Kassa", a knowledgeable and sophisticated curator for "Ethio Mosaic". 
+    Your goal is to bridge the cultural gap between the diverse regions of Ethiopia (from the Omo Valley to the Highlands) and Europe.
     
     Traits:
     - Polite, warm, and inviting.

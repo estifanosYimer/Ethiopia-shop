@@ -51,8 +51,9 @@ const AppContent: React.FC = () => {
             setIsLangMenuOpen(false);
         }
     };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    // Use mousedown for earlier capture than click to prevent race conditions
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Admin Shortcut Listener
@@ -193,9 +194,9 @@ const AppContent: React.FC = () => {
     setInfoModalType(type);
   };
 
-  // Components (Inline for layout simplicity within file constraints)
+  // --- RENDER FUNCTIONS (Instead of Components to prevent remounting) ---
   
-  const Header = () => (
+  const renderHeader = () => (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
@@ -204,7 +205,7 @@ const AppContent: React.FC = () => {
             className="flex flex-col cursor-pointer group" 
             onClick={() => { setCurrentView('home'); setSearchQuery(''); setIsSearchActive(false); }}
           >
-            <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight group-hover:text-eth-earth transition-colors">ABYSSINIA <span className="text-eth-earth">DIRECT</span></h1>
+            <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight group-hover:text-eth-earth transition-colors">ETHIO <span className="text-eth-earth">MOSAIC</span></h1>
             <span className="text-[10px] text-stone-500 uppercase tracking-[0.2em] hidden sm:block">Addis Ababa • Paris • Berlin</span>
           </div>
 
@@ -238,21 +239,21 @@ const AppContent: React.FC = () => {
             {/* Language Selector Desktop */}
             <div className="relative hidden md:block" ref={langMenuRef}>
                 <button 
-                  onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-                  className="flex items-center gap-1 text-stone-600 hover:text-emerald-900 font-bold uppercase text-xs"
+                  onClick={(e) => { e.stopPropagation(); setIsLangMenuOpen(!isLangMenuOpen); }}
+                  className="flex items-center gap-1 text-stone-600 hover:text-emerald-900 font-bold uppercase text-xs p-2 rounded hover:bg-stone-50"
                 >
                     <Globe size={18} />
                     <span>{language.toUpperCase()}</span>
                 </button>
                 {isLangMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-32 bg-white rounded shadow-xl border border-stone-100 py-1 z-50">
+                    <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-xl border border-stone-100 py-2 z-50 overflow-hidden animate-fade-in">
                         {LANGUAGE_OPTIONS.map(opt => (
                             <button
                                 key={opt.code}
-                                onClick={() => { setLanguage(opt.code); setIsLangMenuOpen(false); }}
-                                className={`w-full text-left px-4 py-2 text-sm hover:bg-emerald-50 flex items-center gap-2 ${language === opt.code ? 'font-bold text-emerald-900' : 'text-stone-600'}`}
+                                onClick={(e) => { e.stopPropagation(); setLanguage(opt.code); setIsLangMenuOpen(false); }}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-emerald-50 flex items-center gap-3 transition-colors ${language === opt.code ? 'font-bold text-emerald-900 bg-emerald-50/50' : 'text-stone-600'}`}
                             >
-                                <span className="text-base">{opt.flag}</span> {opt.label}
+                                <span className="text-lg">{opt.flag}</span> {opt.label}
                             </button>
                         ))}
                     </div>
@@ -327,7 +328,7 @@ const AppContent: React.FC = () => {
     </header>
   );
 
-  const Hero = () => (
+  const renderHero = () => (
     <div className="relative bg-eth-earth text-white overflow-hidden h-[75vh] flex items-center justify-center text-center">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center items-center">
         <div className="max-w-4xl animate-fade-in flex flex-col items-center">
@@ -348,7 +349,7 @@ const AppContent: React.FC = () => {
     </div>
   );
 
-  const CategorySection = () => (
+  const renderCategorySection = () => (
     <div className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
@@ -392,7 +393,7 @@ const AppContent: React.FC = () => {
     </div>
   );
 
-  const ProductDetailView = ({ product }: { product: Product }) => (
+  const renderProductDetail = (product: Product) => (
     <div className="bg-parchment min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <button 
@@ -491,13 +492,13 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen font-sans bg-stone-50 text-stone-900 selection:bg-gold-accent selection:text-stone-900">
-      <Header />
+      {renderHeader()}
       
       <main>
         {currentView === 'home' && (
           <>
-            <Hero />
-            <CategorySection />
+            {renderHero()}
+            {renderCategorySection()}
             <div className="py-24 bg-white">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                  <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
@@ -566,15 +567,13 @@ const AppContent: React.FC = () => {
           </div>
         )}
 
-        {currentView === 'product' && selectedProduct && (
-          <ProductDetailView product={selectedProduct} />
-        )}
+        {currentView === 'product' && selectedProduct && renderProductDetail(selectedProduct)}
       </main>
 
       <footer className="bg-stone-900 text-stone-400 py-16 mt-0 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
-             <h2 className="text-white text-2xl font-serif font-bold mb-6 tracking-wide">ABYSSINIA <span className="text-gold-accent">DIRECT</span></h2>
+             <h2 className="text-white text-2xl font-serif font-bold mb-6 tracking-wide">ETHIO <span className="text-gold-accent">MOSAIC</span></h2>
              <p className="max-w-sm text-sm leading-relaxed mb-6">Connecting the Horn of Africa to the world. We specialize in ethically sourced, high-quality cultural artifacts, textiles, and coffee from Ethiopia.</p>
              <div className="flex gap-4">
                  <div className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-eth-earth hover:text-white transition-colors cursor-pointer"><Globe size={18}/></div>
@@ -609,7 +608,7 @@ const AppContent: React.FC = () => {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-stone-800 text-xs text-center flex justify-between items-center text-stone-500">
-          <p>© 2024 Abyssinia Direct. {t('rights_reserved')}</p>
+          <p>© 2024 Ethio Mosaic. {t('rights_reserved')}</p>
           <div className="flex gap-4 items-center">
               <span>{t('privacy_policy')}</span>
               <span>{t('terms_service')}</span>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { X, Minus, Plus, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { CartItem } from '../types';
@@ -47,7 +48,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
                     <ShoppingBag size={32} />
                 </div>
                 <p className="font-serif text-lg">Your cart is empty.</p>
-                <p className="text-sm mt-2 text-stone-400">Discover the treasures of Abyssinia.</p>
+                <p className="text-sm mt-2 text-stone-400">Discover the treasures of Ethiopia.</p>
               </div>
             ) : (
               items.map((item) => (

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy, Loader2, Mail, Phone, ExternalLink } from 'lucide-react';
 import Button from './Button';
@@ -10,7 +11,7 @@ import AutoTranslatedText from './AutoTranslatedText';
 // --- MERCHANT BANK DETAILS ---
 const MERCHANT_BANK_DETAILS = {
     bankName: "Commercial Bank of Ethiopia",
-    accountName: "Abyssinia Direct Exports",
+    accountName: "Ethio Mosaic Exports",
     accountNumber: "1000012345678", 
     swiftCode: "CBETETAA", 
     iban: "ET00CBET1000012345678"
@@ -383,7 +384,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
 
                   <div className="bg-stone-50 p-4 rounded text-xs text-stone-500 flex gap-2 items-start mt-4">
                     <ShieldCheck size={16} className="text-emerald-700 flex-shrink-0 mt-0.5" />
-                    <p>Payments are securely processed by AbyssiniaPay. Your financial data is encrypted and never stored on our servers.</p>
+                    <p>Payments are securely processed by MosaicPay. Your financial data is encrypted and never stored on our servers.</p>
                   </div>
 
                   <div className="pt-6 flex justify-between items-center">

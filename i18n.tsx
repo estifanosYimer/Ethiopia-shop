@@ -93,7 +93,7 @@ const translations: Record<string, Record<string, string>> = {
     policy_shipping_standard: "Standard: 7-10 business days.",
     policy_shipping_customs_title: "Customs & Duties",
     policy_shipping_customs: "For customers within the European Union, we offer a DDP (Delivered Duty Paid) service.",
-    policy_auth_intro: "Every item on Abyssinia Direct is verified by our on-ground curators in Addis Ababa.",
+    policy_auth_intro: "Every item on Ethio Mosaic is verified by our on-ground curators in Addis Ababa.",
     policy_auth_promise_title: "Our Promise",
     policy_auth_handmade: "Handmade: We visit the weavers in Dorze and the potters in Jimma personally.",
     policy_auth_materials: "Materials: We guarantee the use of genuine materials.",
@@ -106,7 +106,7 @@ const translations: Record<string, Record<string, string>> = {
     policy_return_process_title: "Process",
     policy_return_process: "To initiate a return, contact our support team.",
     
-    // PRODUCTS (English keys needed for Reverse Lookup)
+    // PRODUCTS
     product_f1_name: 'Royal Habesha Kemis',
     product_f1_desc: 'Exquisite handwoven cotton dress with gold-thread Tibeb embroidery.',
     product_f2_name: 'Men’s Traditional Telet Suit',
@@ -208,7 +208,7 @@ const translations: Record<string, Record<string, string>> = {
     form_phone: 'ስልክ ቁጥር',
     form_address: 'አድራሻ',
     form_city: 'ከተማ',
-    form_country: 'ሀገር',
+    form_country: 'ሃገር',
     pay_card: 'ክሬዲት / ዴቢት ካርድ',
     pay_paypal: 'PayPal',
     pay_bank: 'ባንክ ዝውውር',
@@ -903,7 +903,7 @@ const translations: Record<string, Record<string, string>> = {
     policy_auth_intro: "Elk artikel wordt geverifieerd.",
     policy_auth_promise_title: "Onze Belofte",
     policy_auth_handmade: "Handgemaakt: Wij bezoeken de ambachtslieden.",
-    policy_auth_materials: "Materialen: Wij garanderen echtheid.",
+    policy_auth_materials: "Materialien: Wij garanderen echtheid.",
     policy_auth_provenance: "Herkomst: Met certificaat.",
     policy_return_intro: "Wij volgen de EU-wetgeving.",
     policy_return_policy_title: "Beleid",
