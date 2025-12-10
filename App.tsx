@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight as ArrowRightIcon } from 'lucide-react';
-import { MOCK_PRODUCTS } from './constants';
+import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight as ArrowRightIcon, Loader2 } from 'lucide-react';
 import { Product, CartItem, Category, LanguageCode } from './types';
 import ProductList from './components/ProductList';
 import CartSidebar from './components/CartSidebar';
@@ -12,6 +11,7 @@ import Button from './components/Button';
 import ImageWithFallback from './components/ImageWithFallback';
 import { LanguageProvider, useLanguage } from './i18n';
 import AutoTranslatedText from './components/AutoTranslatedText';
+import { backend } from './services/backend';
 
 const LANGUAGE_OPTIONS: {code: LanguageCode; label: string; flag: string}[] = [
     { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -28,6 +28,9 @@ const AppContent: React.FC = () => {
   const { t, language, setLanguage } = useLanguage();
 
   // State
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  
   const [currentView, setCurrentView] = useState<'home' | 'shop' | 'product'>('home');
   const [selectedCategory, setSelectedCategory] = useState<Category>(Category.ALL);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
@@ -43,6 +46,21 @@ const AppContent: React.FC = () => {
   // Search State
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Initial Data Fetch
+  useEffect(() => {
+    const loadData = async () => {
+        try {
+            const data = await backend.getProducts();
+            setProducts(data);
+        } catch (e) {
+            console.error("Failed to load products", e);
+        } finally {
+            setLoadingProducts(false);
+        }
+    };
+    loadData();
+  }, [isOrdersOpen]); // Reload when admin panel closes in case products changed
 
   // Close language menu when clicking outside
   useEffect(() => {
@@ -90,17 +108,17 @@ const AppContent: React.FC = () => {
 
   // Computed
   const filteredProducts = useMemo(() => {
-    let products = MOCK_PRODUCTS;
+    let filtered = products;
 
     // Filter by category if not All AND not searching (search usually overrides category, or we can combine)
     if (selectedCategory !== Category.ALL) {
-      products = products.filter(p => p.category === selectedCategory);
+      filtered = filtered.filter(p => p.category === selectedCategory);
     }
 
     // Filter by search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      products = products.filter(p => {
+      filtered = filtered.filter(p => {
         // Search against translated fields for the current language
         const translatedName = t(`product_${p.id}_name`).toLowerCase();
         const translatedDesc = t(`product_${p.id}_desc`).toLowerCase();
@@ -118,8 +136,8 @@ const AppContent: React.FC = () => {
       });
     }
     
-    return products;
-  }, [selectedCategory, searchQuery, language]);
+    return filtered;
+  }, [selectedCategory, searchQuery, language, products]);
 
   // Handlers
   const handleAddToCart = (product: Product) => {
@@ -495,7 +513,16 @@ const AppContent: React.FC = () => {
       {renderHeader()}
       
       <main>
-        {currentView === 'home' && (
+        {loadingProducts && currentView === 'home' && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-parchment">
+                <div className="flex flex-col items-center">
+                    <Loader2 size={48} className="animate-spin text-emerald-900 mb-4" />
+                    <p className="font-serif text-stone-600">Loading Collection...</p>
+                </div>
+            </div>
+        )}
+
+        {currentView === 'home' && !loadingProducts && (
           <>
             {renderHero()}
             {renderCategorySection()}
@@ -511,7 +538,7 @@ const AppContent: React.FC = () => {
                     </button>
                  </div>
                  <ProductList 
-                    products={MOCK_PRODUCTS.slice(0, 3)} 
+                    products={products.slice(0, 3)} 
                     onProductClick={navigateToProduct}
                     onAddToCart={handleAddToCart}
                  />
@@ -545,7 +572,9 @@ const AppContent: React.FC = () => {
               )}
             </div>
             
-            {filteredProducts.length > 0 ? (
+            {loadingProducts ? (
+               <div className="py-20 text-center text-stone-500">Loading catalog...</div>
+            ) : filteredProducts.length > 0 ? (
                 <ProductList 
                 products={filteredProducts} 
                 onProductClick={navigateToProduct}
