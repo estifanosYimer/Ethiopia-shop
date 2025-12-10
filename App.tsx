@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight as ArrowRightIcon, Loader2 } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, ArrowLeft, ChevronRight, Globe, Coffee, Palette, Shirt, ArrowRight as ArrowRightIcon, Loader2, Send } from 'lucide-react';
 import { Product, CartItem, Category, LanguageCode } from './types';
 import ProductList from './components/ProductList';
 import CartSidebar from './components/CartSidebar';
@@ -12,6 +12,7 @@ import ImageWithFallback from './components/ImageWithFallback';
 import { LanguageProvider, useLanguage } from './i18n';
 import AutoTranslatedText from './components/AutoTranslatedText';
 import { backend } from './services/backend';
+import ToastContainer, { ToastMessage } from './components/Toast';
 
 const LANGUAGE_OPTIONS: {code: LanguageCode; label: string; flag: string}[] = [
     { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -22,6 +23,7 @@ const LANGUAGE_OPTIONS: {code: LanguageCode; label: string; flag: string}[] = [
     { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
     { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
     { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+    { code: 'es', label: 'Español', flag: '🇪🇸' },
 ];
 
 const AppContent: React.FC = () => {
@@ -46,6 +48,17 @@ const AppContent: React.FC = () => {
   // Search State
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Toast State
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const addToast = (message: string, type: 'success' | 'error' = 'success') => {
+      const id = Date.now().toString();
+      setToasts(prev => [...prev, { id, message, type }]);
+      setTimeout(() => {
+          setToasts(prev => prev.filter(t => t.id !== id));
+      }, 3000);
+  };
 
   // Initial Data Fetch
   useEffect(() => {
@@ -148,7 +161,9 @@ const AppContent: React.FC = () => {
       }
       return [...prev, { ...product, quantity: 1 }];
     });
-    setIsCartOpen(true);
+    addToast(`${t(`product_${product.id}_name`)} added to cart`);
+    // Optional: Open cart automatically
+    // setIsCartOpen(true);
   };
 
   const handleUpdateCartQuantity = (id: string, delta: number) => {
@@ -171,7 +186,7 @@ const AppContent: React.FC = () => {
 
   const handleCheckoutComplete = () => {
     setCart([]);
-    // Modal will be closed by the user clicking "Return to Shop" which calls onClose
+    addToast('Order placed successfully!', 'success');
   };
 
   const navigateToProduct = (product: Product) => {
@@ -309,7 +324,7 @@ const AppContent: React.FC = () => {
       
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-parchment border-b border-stone-200 py-4 px-4 space-y-4 shadow-lg max-h-[80vh] overflow-y-auto">
+        <div className="md:hidden bg-parchment border-b border-stone-200 py-4 px-4 space-y-4 shadow-lg max-h-[80vh] overflow-y-auto z-[60] fixed top-20 w-full">
            <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
               <input 
@@ -509,7 +524,9 @@ const AppContent: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen font-sans bg-stone-50 text-stone-900 selection:bg-gold-accent selection:text-stone-900">
+    <div className="min-h-screen font-sans bg-stone-50 text-stone-900 selection:bg-gold-accent selection:text-stone-900 relative">
+      <ToastContainer toasts={toasts} onRemove={(id) => setToasts(prev => prev.filter(t => t.id !== id))} />
+      
       {renderHeader()}
       
       <main>
@@ -604,9 +621,18 @@ const AppContent: React.FC = () => {
           <div className="col-span-1 md:col-span-2">
              <h2 className="text-white text-2xl font-serif font-bold mb-6 tracking-wide">ETHIO <span className="text-gold-accent">MOSAIC</span></h2>
              <p className="max-w-sm text-sm leading-relaxed mb-6">Connecting the Horn of Africa to the world. We specialize in ethically sourced, high-quality cultural artifacts, textiles, and coffee from Ethiopia.</p>
-             <div className="flex gap-4">
+             <div className="flex gap-4 mb-8">
                  <div className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-eth-earth hover:text-white transition-colors cursor-pointer"><Globe size={18}/></div>
                  <div className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-gold-accent hover:text-stone-900 transition-colors cursor-pointer"><Coffee size={18}/></div>
+             </div>
+             
+             {/* Newsletter Signup */}
+             <div className="max-w-sm">
+                 <p className="text-xs uppercase font-bold tracking-widest text-stone-500 mb-3">Subscribe to our newsletter</p>
+                 <div className="flex gap-2">
+                     <input type="email" placeholder="Email Address" className="bg-stone-800 border-none text-white text-sm px-4 py-2 flex-1 focus:ring-1 focus:ring-gold-accent outline-none" />
+                     <button className="bg-gold-accent text-stone-900 px-4 py-2 hover:bg-white transition-colors font-bold"><ArrowRightIcon size={16}/></button>
+                 </div>
              </div>
           </div>
           <div>

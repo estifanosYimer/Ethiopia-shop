@@ -58,4 +58,4 @@ export interface Order {
   status: 'pending' | 'shipped';
 }
 
-export type LanguageCode = 'en' | 'am' | 'om' | 'ti' | 'fr' | 'nl' | 'it' | 'de';
+export type LanguageCode = 'en' | 'am' | 'om' | 'ti' | 'fr' | 'nl' | 'it' | 'de' | 'es';
