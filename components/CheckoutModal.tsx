@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy, Loader2, Mail, Phone, ExternalLink } from 'lucide-react';
+import { X, Lock, CheckCircle, CreditCard, ShieldCheck, ArrowRight, ArrowLeft, Building, Copy, Loader2, Mail, Phone, ExternalLink, AlertCircle } from 'lucide-react';
 import Button from './Button';
 import { CartItem, ShippingDetails, Order, PaymentMethod, CardProvider } from '../types';
 import ImageWithFallback from './ImageWithFallback';
@@ -33,14 +33,40 @@ interface CheckoutModalProps {
 
 type CheckoutStep = 'shipping' | 'payment' | 'confirmation';
 
+// Helper: Simple Luhn Algorithm for basic card validation
+const isValidCreditCard = (value: string) => {
+  if (/[^0-9-\s]+/.test(value)) return false;
+  let nCheck = 0, nDigit = 0, bEven = false;
+  const newValue = value.replace(/\D/g, "");
+  if(newValue.length < 13 || newValue.length > 19) return false;
+
+  for (let n = newValue.length - 1; n >= 0; n--) {
+    const cDigit = newValue.charAt(n);
+    nDigit = parseInt(cDigit, 10);
+    if (bEven) {
+      if ((nDigit *= 2) > 9) nDigit -= 9;
+    }
+    nCheck += nDigit;
+    bEven = !bEven;
+  }
+  return (nCheck % 10) === 0;
+};
+
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, onComplete }) => {
   const { t, language } = useLanguage();
   const [step, setStep] = useState<CheckoutStep>('shipping');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit_card');
   const [cardProvider, setCardProvider] = useState<CardProvider>('visa');
+  
+  // Processing States
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState<string>(''); // For UX feedback
+  
   const [shippingData, setShippingData] = useState<ShippingDetails | null>(null);
   const [orderRef, setOrderRef] = useState('');
+  
+  // Validation Error State
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Reset state when modal is closed
   useEffect(() => {
@@ -48,8 +74,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
       setStep('shipping');
       setPaymentMethod('credit_card');
       setIsProcessing(false);
+      setErrors({});
+      setProcessingStatus('');
     } else {
-        // Generate a new reference for the session
         setOrderRef(`ETH-${Math.floor(Math.random() * 100000)}`);
     }
   }, [isOpen]);
@@ -79,12 +106,69 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
     setStep('payment');
   };
 
-  const handlePaymentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePayPalFlow = async () => {
+      setIsProcessing(true);
+      setProcessingStatus('Connecting to PayPal Secure Gateway...');
+      
+      // 1. Simulate opening the provider
+      setTimeout(() => {
+          // Open PayPal in new tab
+          window.open('https://www.paypal.com/signin', '_blank');
+          setProcessingStatus('Waiting for payment confirmation...');
+          
+          // 2. Simulate User completing payment in other tab and webhook arriving
+          setTimeout(() => {
+              completeOrder();
+          }, 5000); // 5 seconds "wait" time
+      }, 1500);
+  };
+
+  const handleCreditCardFlow = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const cardNum = formData.get('cardNumber') as string;
+      const expiry = formData.get('expiry') as string;
+      const cvc = formData.get('cvc') as string;
+
+      // Reset Errors
+      setErrors({});
+      const newErrors: Record<string, string> = {};
+
+      // 1. Validate Card Number (Luhn)
+      if (!isValidCreditCard(cardNum)) {
+          newErrors.cardNumber = "Invalid card number. Please check digits.";
+      }
+
+      // 2. Validate Expiry (MM/YY)
+      if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(expiry)) {
+          newErrors.expiry = "Invalid format (MM/YY).";
+      }
+
+      // 3. Validate CVC
+      if (!/^[0-9]{3,4}$/.test(cvc)) {
+          newErrors.cvc = "Invalid CVC.";
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+          setErrors(newErrors);
+          return;
+      }
+
+      // 4. Simulate Processing
+      setIsProcessing(true);
+      setProcessingStatus('Encrypting data...');
+      await new Promise(r => setTimeout(r, 1000));
+      setProcessingStatus('Contacting issuing bank...');
+      await new Promise(r => setTimeout(r, 1500));
+      setProcessingStatus('Verifying transaction...');
+      await new Promise(r => setTimeout(r, 1000));
+      
+      completeOrder();
+  };
+
+  const completeOrder = async () => {
     if (!shippingData) return;
 
-    setIsProcessing(true);
-    
     const newOrder: Order = {
         id: orderRef,
         date: new Date().toISOString(),
@@ -103,13 +187,27 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
     try {
         await saveOrder(newOrder);
         setIsProcessing(false);
+        setProcessingStatus('');
         setStep('confirmation');
-        onComplete(); // Clears cart in parent
+        onComplete(); 
     } catch (error) {
         console.error("Payment failed", error);
         setIsProcessing(false);
-        alert("There was an issue processing your order. Please try again.");
+        setProcessingStatus('');
+        alert("Payment Gateway Error: Unable to process. Please try again.");
     }
+  };
+
+  // Helper handler that delegates to specific flows
+  const handleGeneralSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (paymentMethod === 'bank_transfer') {
+          // Bank transfer is manual confirmation
+          setIsProcessing(true);
+          setProcessingStatus('Registering order...');
+          setTimeout(completeOrder, 1500);
+      }
+      // Credit card is handled by the form onSubmit directly
   };
 
   const Steps = () => (
@@ -134,7 +232,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-stone-900/70 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-stone-900/70 backdrop-blur-sm" onClick={() => !isProcessing && onClose()}></div>
 
       {/* Modal Content */}
       <div className="relative w-full max-w-4xl bg-parchment rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] md:h-auto">
@@ -188,9 +286,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
 
         {/* Right Panel: Checkout Form */}
         <div className="w-full md:w-2/3 p-6 md:p-8 bg-white flex flex-col h-full overflow-y-auto relative">
-           <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-800">
-             <X size={24} />
-           </button>
+           {!isProcessing && (
+               <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-800">
+                 <X size={24} />
+               </button>
+           )}
 
            <div className="mb-6 flex items-center gap-2 text-emerald-800">
              <Lock size={16} />
@@ -260,7 +360,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
            )}
 
            {step === 'payment' && (
-             <div className="animate-fade-in">
+             <div className="animate-fade-in relative">
+                {isProcessing && (
+                    <div className="absolute inset-0 bg-white/90 z-50 flex flex-col items-center justify-center text-center">
+                        <Loader2 size={48} className="animate-spin text-emerald-900 mb-4" />
+                        <h3 className="font-serif text-xl font-bold text-stone-900">{t('processing')}</h3>
+                        <p className="text-stone-500 text-sm mt-2">{processingStatus}</p>
+                    </div>
+                )}
+
                 <h2 className="text-2xl font-serif font-bold text-stone-900 mb-6">{t('step_payment')}</h2>
                 
                 {/* Method Selection Tabs */}
@@ -293,10 +401,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
                   </div>
                 </div>
 
-                <form className="space-y-4" onSubmit={handlePaymentSubmit}>
-                  
-                  {/* Credit Card Details */}
-                  {paymentMethod === 'credit_card' && (
+                {/* --- CREDIT CARD FORM --- */}
+                {paymentMethod === 'credit_card' && (
+                    <form className="space-y-4" onSubmit={handleCreditCardFlow}>
                       <div className="animate-fade-in space-y-4">
                         <div className="flex gap-2 mb-4">
                             {['visa', 'mastercard', 'amex'].map((p) => (
@@ -315,87 +422,111 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
                             <label className="text-xs font-bold text-stone-500 uppercase">{t('card_number')}</label>
                             <div className="relative">
                                 <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-                                <input required type="text" placeholder="0000 0000 0000 0000" className="w-full border border-stone-300 rounded px-3 py-2 pl-10 focus:ring-2 focus:ring-emerald-800 outline-none transition-all font-mono" />
+                                <input name="cardNumber" required type="text" placeholder="0000 0000 0000 0000" className={`w-full border rounded px-3 py-2 pl-10 focus:ring-2 focus:ring-emerald-800 outline-none transition-all font-mono ${errors.cardNumber ? 'border-red-500 bg-red-50' : 'border-stone-300'}`} />
                                 <Lock className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600" size={14} />
                             </div>
+                            {errors.cardNumber && <p className="text-xs text-red-600 flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.cardNumber}</p>}
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <label className="text-xs font-bold text-stone-500 uppercase">{t('expiry')}</label>
-                                <input required type="text" placeholder="MM/YY" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all text-center" />
+                                <input name="expiry" required type="text" placeholder="MM/YY" className={`w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all text-center ${errors.expiry ? 'border-red-500 bg-red-50' : 'border-stone-300'}`} />
+                                {errors.expiry && <p className="text-xs text-red-600 flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.expiry}</p>}
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-bold text-stone-500 uppercase">{t('cvc')}</label>
-                                <input required type="text" placeholder="123" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all text-center" />
+                                <input name="cvc" required type="text" placeholder="123" className={`w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all text-center ${errors.cvc ? 'border-red-500 bg-red-50' : 'border-stone-300'}`} />
+                                {errors.cvc && <p className="text-xs text-red-600 flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.cvc}</p>}
                             </div>
                         </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-stone-500 uppercase">{t('cardholder_name')}</label>
-                            <input required type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                            <input name="cardHolder" required type="text" className="w-full border border-stone-300 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-800 outline-none transition-all" />
+                        </div>
+                        
+                        <div className="pt-6 flex justify-between items-center">
+                            <button type="button" onClick={() => setStep('shipping')} className="text-stone-500 hover:text-stone-900 flex items-center gap-1 text-sm font-medium">
+                            <ArrowLeft size={16} /> {t('back')}
+                            </button>
+                            <Button type="submit" disabled={isProcessing} className="w-2/3 flex items-center justify-center gap-2">
+                            {isProcessing ? <><Loader2 size={16} className="animate-spin"/> {t('processing')}</> : `${t('pay_order_btn')} €${total.toFixed(2)}`}
+                            </Button>
                         </div>
                       </div>
+                    </form>
                   )}
 
-                  {/* PayPal Details */}
+                  {/* --- PAYPAL FLOW --- */}
                   {paymentMethod === 'paypal' && (
                       <div className="animate-fade-in bg-stone-50 border border-stone-200 rounded-lg p-6 flex flex-col items-center text-center space-y-4">
                           <p className="text-stone-600 text-sm">{t('redirect_paypal')}</p>
-                          <button type="button" className="bg-[#0070BA] text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-[#005ea6] transition-colors w-full justify-center max-w-xs">
+                          <button 
+                            type="button" 
+                            onClick={handlePayPalFlow}
+                            className="bg-[#0070BA] text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-[#005ea6] transition-colors w-full justify-center max-w-xs shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                          >
                               Pay with <span className="italic font-extrabold">PayPal</span> <ExternalLink size={16}/>
                           </button>
-                          <div className="text-xs text-stone-400">
-                             For this demo, simply click "Pay Order" below.
+                          <div className="text-xs text-stone-400 mt-2">
+                             A new tab will open to complete your secure transaction.
+                          </div>
+                          
+                          <div className="pt-6 w-full flex justify-start">
+                            <button type="button" onClick={() => setStep('shipping')} className="text-stone-500 hover:text-stone-900 flex items-center gap-1 text-sm font-medium">
+                                <ArrowLeft size={16} /> {t('back')}
+                            </button>
                           </div>
                       </div>
                   )}
 
-                  {/* Bank Transfer Details */}
+                  {/* --- BANK TRANSFER FLOW --- */}
                   {paymentMethod === 'bank_transfer' && (
-                      <div className="animate-fade-in bg-stone-50 border border-stone-200 rounded-lg p-5 space-y-4">
-                          <p className="text-sm text-stone-600 mb-2">{t('bank_transfer_intro')}</p>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                              <div>
-                                  <span className="block text-xs font-bold text-stone-400 uppercase">{t('bank_name')}</span>
-                                  <span className="font-medium text-stone-900">{MERCHANT_BANK_DETAILS.bankName}</span>
-                              </div>
-                              <div>
-                                  <span className="block text-xs font-bold text-stone-400 uppercase">{t('account_name')}</span>
-                                  <span className="font-medium text-stone-900">{MERCHANT_BANK_DETAILS.accountName}</span>
-                              </div>
-                              <div>
-                                  <span className="block text-xs font-bold text-stone-400 uppercase">{t('account_number')}</span>
-                                  <div className="flex items-center gap-2">
-                                      <span className="font-mono text-stone-900 bg-white px-2 py-1 rounded border border-stone-200">{MERCHANT_BANK_DETAILS.iban}</span>
-                                      <Copy size={14} className="text-stone-400 cursor-pointer hover:text-emerald-800" />
-                                  </div>
-                              </div>
-                              <div>
-                                  <span className="block text-xs font-bold text-stone-400 uppercase">{t('swift')}</span>
-                                  <span className="font-mono text-stone-900 bg-white px-2 py-1 rounded border border-stone-200 inline-block">{MERCHANT_BANK_DETAILS.swiftCode}</span>
-                              </div>
-                          </div>
-                          
-                          <div className="bg-emerald-50 text-emerald-900 text-xs p-3 rounded mt-2 font-medium">
-                              {t('ref_message')}: <span className="font-mono font-bold select-all">ORDER {orderRef}</span>
-                          </div>
-                      </div>
+                      <form onSubmit={handleGeneralSubmit}>
+                        <div className="animate-fade-in bg-stone-50 border border-stone-200 rounded-lg p-5 space-y-4">
+                            <p className="text-sm text-stone-600 mb-2">{t('bank_transfer_intro')}</p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span className="block text-xs font-bold text-stone-400 uppercase">{t('bank_name')}</span>
+                                    <span className="font-medium text-stone-900">{MERCHANT_BANK_DETAILS.bankName}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-xs font-bold text-stone-400 uppercase">{t('account_name')}</span>
+                                    <span className="font-medium text-stone-900">{MERCHANT_BANK_DETAILS.accountName}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-xs font-bold text-stone-400 uppercase">{t('account_number')}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-mono text-stone-900 bg-white px-2 py-1 rounded border border-stone-200">{MERCHANT_BANK_DETAILS.iban}</span>
+                                        <Copy size={14} className="text-stone-400 cursor-pointer hover:text-emerald-800" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <span className="block text-xs font-bold text-stone-400 uppercase">{t('swift')}</span>
+                                    <span className="font-mono text-stone-900 bg-white px-2 py-1 rounded border border-stone-200 inline-block">{MERCHANT_BANK_DETAILS.swiftCode}</span>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-emerald-50 text-emerald-900 text-xs p-3 rounded mt-2 font-medium">
+                                {t('ref_message')}: <span className="font-mono font-bold select-all">ORDER {orderRef}</span>
+                            </div>
+                        </div>
+                        
+                        <div className="pt-6 flex justify-between items-center">
+                            <button type="button" onClick={() => setStep('shipping')} className="text-stone-500 hover:text-stone-900 flex items-center gap-1 text-sm font-medium">
+                            <ArrowLeft size={16} /> {t('back')}
+                            </button>
+                            <Button type="submit" disabled={isProcessing} className="w-2/3 flex items-center justify-center gap-2">
+                            {isProcessing ? <><Loader2 size={16} className="animate-spin"/> {t('processing')}</> : `${t('pay_order_btn')} €${total.toFixed(2)}`}
+                            </Button>
+                        </div>
+                      </form>
                   )}
 
                   <div className="bg-stone-50 p-4 rounded text-xs text-stone-500 flex gap-2 items-start mt-4">
                     <ShieldCheck size={16} className="text-emerald-700 flex-shrink-0 mt-0.5" />
-                    <p>Payments are securely processed by MosaicPay. Your financial data is encrypted and never stored on our servers.</p>
+                    <p>Payments are securely processed by MosaicPay. Your financial data is encrypted using 256-bit SSL technology and never stored on our servers.</p>
                   </div>
-
-                  <div className="pt-6 flex justify-between items-center">
-                    <button type="button" onClick={() => setStep('shipping')} className="text-stone-500 hover:text-stone-900 flex items-center gap-1 text-sm font-medium">
-                      <ArrowLeft size={16} /> {t('back')}
-                    </button>
-                    <Button type="submit" disabled={isProcessing} className="w-2/3 flex items-center justify-center gap-2">
-                      {isProcessing ? <><Loader2 size={16} className="animate-spin"/> {t('processing')}</> : `${t('pay_order_btn')} €${total.toFixed(2)}`}
-                    </Button>
-                  </div>
-                </form>
              </div>
            )}
 
