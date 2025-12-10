@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { X, RefreshCw, Archive, MapPin, ShoppingBag, Package, Lock, Mail, Phone, Globe, LayoutGrid, Plus, Edit, Trash2, Save, Loader2 } from 'lucide-react';
+import { X, RefreshCw, Archive, MapPin, ShoppingBag, Package, Lock, Mail, Phone, Globe, LayoutGrid, Plus, Edit, Trash2, Save, Loader2, Image as ImageIcon } from 'lucide-react';
 import { backend } from '../services/backend';
 import { Order, Product, Category } from '../types';
 import Button from './Button';
@@ -95,16 +95,41 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
       }
   };
 
+  const processImageUrl = (url?: string): string => {
+      if (!url) return '';
+      let cleanUrl = url.trim();
+
+      // 1. Fix GitHub Blob URLs to Raw URLs
+      // From: https://github.com/user/repo/blob/main/image.png
+      // To:   https://raw.githubusercontent.com/user/repo/main/image.png
+      if (cleanUrl.includes('github.com') && cleanUrl.includes('/blob/')) {
+          cleanUrl = cleanUrl.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+      }
+
+      // 2. Fallback for testing if user types "test"
+      if (cleanUrl === 'test') {
+          return 'https://placehold.co/600x800/EEE/31343C?text=New+Product';
+      }
+
+      return cleanUrl;
+  };
+
   const handleSaveProduct = async (e: React.FormEvent) => {
       e.preventDefault();
       setSavingProduct(true);
       
       try {
-          if (editingProduct.id) {
-              await backend.updateProduct(editingProduct.id, editingProduct);
+          // Process the image URL to fix GitHub links automatically
+          const finalProductData = {
+              ...editingProduct,
+              imageUrl: processImageUrl(editingProduct.imageUrl)
+          };
+
+          if (finalProductData.id) {
+              await backend.updateProduct(finalProductData.id, finalProductData);
           } else {
               // Create new (cast to remove ID from type if needed, backend handles ID gen)
-              await backend.addProduct(editingProduct as any);
+              await backend.addProduct(finalProductData as any);
           }
           setIsEditingProduct(false);
           refreshData();
@@ -364,9 +389,19 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
                                     <textarea required className="w-full border p-2 rounded" rows={4} value={editingProduct.detailedHistory} onChange={e => setEditingProduct({...editingProduct, detailedHistory: e.target.value})} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Image URL</label>
-                                    <input required className="w-full border p-2 rounded" placeholder="https://..." value={editingProduct.imageUrl} onChange={e => setEditingProduct({...editingProduct, imageUrl: e.target.value})} />
-                                    <p className="text-[10px] text-stone-400 mt-1">Tip: Use a URL. For demo, try copying one from existing items.</p>
+                                    <label className="block text-xs font-bold uppercase text-stone-500 mb-1 flex items-center gap-1">
+                                        <ImageIcon size={12}/> Image URL
+                                    </label>
+                                    <input 
+                                        required 
+                                        className="w-full border p-2 rounded text-xs" 
+                                        placeholder="Paste GitHub 'blob' or 'raw' link here" 
+                                        value={editingProduct.imageUrl} 
+                                        onChange={e => setEditingProduct({...editingProduct, imageUrl: e.target.value})} 
+                                    />
+                                    <p className="text-[10px] text-emerald-700 mt-1 flex items-center gap-1">
+                                        ✨ Auto-fixes GitHub 'blob' links to 'raw' automatically!
+                                    </p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <input type="checkbox" checked={editingProduct.inStock} onChange={e => setEditingProduct({...editingProduct, inStock: e.target.checked})} />
